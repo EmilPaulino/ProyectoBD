@@ -10,21 +10,21 @@ public class TipoEnfermedad implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 	
-	private int idTipoEnfermedad;
+	private int codTipoEnfermedad;
 	private String nombreTipo;
 	
 	public TipoEnfermedad(int idTipoEnfermedad, String nombreTipo) {
 		super();
-		this.idTipoEnfermedad = idTipoEnfermedad;
+		this.codTipoEnfermedad = idTipoEnfermedad;
 		this.nombreTipo = nombreTipo;
 	}
 
 	public int getIdTipoEnfermedad() {
-		return idTipoEnfermedad;
+		return codTipoEnfermedad;
 	}
 
 	public void setIdTipoEnfermedad(int idTipoEnfermedad) {
-		this.idTipoEnfermedad = idTipoEnfermedad;
+		this.codTipoEnfermedad = idTipoEnfermedad;
 	}
 
 	public String getNombreTipo() {
