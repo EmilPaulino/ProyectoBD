@@ -9,11 +9,19 @@ public class Rol {
         this.descripcion = descripcion;
     }
 
-    public int getIdRol() { return idRol; }
-    public String getDescripcion() { return descripcion; }
+	public int getIdRol() {
+		return idRol;
+	}
 
-    @Override
-    public String toString() {
-        return descripcion; // lo que verá el combo
-    }
+	public void setIdRol(int idRol) {
+		this.idRol = idRol;
+	}
+
+	public String getDescripcion() {
+		return descripcion;
+	}
+
+	public void setDescripcion(String descripcion) {
+		this.descripcion = descripcion;
+	}
 }
