@@ -13,9 +13,9 @@ public class Usuario implements Serializable {
 	private String usuario;
 	private String contrasenia;
 	private int idRol;
-	private int idPersona;
+	private String idPersona;
 	
-	public Usuario(String idUsuario, String usuario, String contrasenia, int idRol, int idPersona) {
+	public Usuario(String idUsuario, String usuario, String contrasenia, int idRol, String idPersona) {
 		super();
 		this.idUsuario = idUsuario;
 		this.usuario = usuario;
@@ -56,11 +56,11 @@ public class Usuario implements Serializable {
 		this.idRol = idRol;
 	}
 
-	public int getIdPersona() {
+	public String getIdPersona() {
 		return idPersona;
 	}
 
-	public void setIdPersona(int idPersona) {
+	public void setIdPersona(String idPersona) {
 		this.idPersona = idPersona;
 	}
 	

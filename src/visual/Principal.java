@@ -97,14 +97,14 @@ public class Principal extends JFrame {
 		});
 		mnNewMenu.add(mntmNewMenuItem_1);
 		
-		if(ClinicaMedica.getLoginUsuario().getRol().equalsIgnoreCase("Administrativo")) {
+		if(ClinicaMedica.getLoginUsuario().getIdRol() == 1 ) {
 			mntmNewMenuItem_1.setEnabled(false);
 		}
 
 		JMenu mnNewMenu_1 = new JMenu("M\u00E9dicos");
 		menuBar.add(mnNewMenu_1);
 		
-		if(ClinicaMedica.getLoginUsuario().getRol().equalsIgnoreCase("Médico")) {
+		if(ClinicaMedica.getLoginUsuario().getIdRol() == 2) {
 			mnNewMenu_1.setEnabled(false);
 		}
 		
@@ -193,7 +193,7 @@ public class Principal extends JFrame {
 		});
 		mnNewMenu_3.add(mntmNewMenuItem_13);
 		
-		if(ClinicaMedica.getLoginUsuario().getRol().equalsIgnoreCase("Médico")) {
+		if(ClinicaMedica.getLoginUsuario().getIdRol() == 2) {
 			mntmNewMenuItem_7.setEnabled(false);
 		
 		}
@@ -201,7 +201,7 @@ public class Principal extends JFrame {
 		JMenu mnNewMenu_4 = new JMenu("Consultas");
 		menuBar.add(mnNewMenu_4);
 		
-		if(ClinicaMedica.getLoginUsuario().getRol().equalsIgnoreCase("Administrativo")) {
+		if(ClinicaMedica.getLoginUsuario().getIdRol() == 3) {
 			mnNewMenu_4.setEnabled(false);
 		
 		}
@@ -255,9 +255,9 @@ public class Principal extends JFrame {
 		});
 		mnNewMenu_5.add(mntmNewMenuItem_12);
 		
-		if(ClinicaMedica.getLoginUsuario().getRol().equalsIgnoreCase("Administrativo")) {
+		if(ClinicaMedica.getLoginUsuario().getIdRol() == 3) {
 			mntmNewMenuItem_12.setEnabled(false);
-		} else if(ClinicaMedica.getLoginUsuario().getRol().equalsIgnoreCase("Médico")) {
+		} else if(ClinicaMedica.getLoginUsuario().getIdRol()== 2) {
 			mntmNewMenuItem_11.setEnabled(false);
 			mntmNewMenuItem_10.setEnabled(false);
 		}
@@ -265,7 +265,7 @@ public class Principal extends JFrame {
 		JMenu mnNewMenu_7 = new JMenu("Usuarios");
 		menuBar.add(mnNewMenu_7);
 		
-		if(ClinicaMedica.getLoginUsuario().getRol().equalsIgnoreCase("Administrativo") || ClinicaMedica.getLoginUsuario().getRol().equalsIgnoreCase("Médico") ) {
+		if(ClinicaMedica.getLoginUsuario().getIdRol() == 3 || ClinicaMedica.getLoginUsuario().getIdRol() == 2 ) {
 			mnNewMenu_7.setEnabled(false);
 		}
 		

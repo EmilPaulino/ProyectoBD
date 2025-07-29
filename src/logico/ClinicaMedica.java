@@ -1,8 +1,14 @@
 package logico;
 
 import java.io.Serializable;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
+
+import conexionsql.Conexion;
 
 public class ClinicaMedica implements Serializable {
 	
@@ -471,12 +477,35 @@ public class ClinicaMedica implements Serializable {
 
 	public boolean confirmarLogin(String usuario, String contrasena) {
 		boolean login = false;
-		for(Usuario usua : losUsuarios) {
-			if(usua.getUsuario().equalsIgnoreCase(usuario) && usua.getContrasenia().equalsIgnoreCase(contrasena)) {
-				loginUsuario = usua;
+
+		try {
+			Conexion miConexion = new Conexion();  // Usas tu clase personalizada
+			Connection conn = miConexion.getConexion();
+
+			String query = "SELECT * FROM Usuario WHERE usuario = ? AND contrasenia = ?";
+			PreparedStatement ps = conn.prepareStatement(query);
+			ps.setString(1, usuario);
+			ps.setString(2, contrasena);
+
+			ResultSet rs = ps.executeQuery();
+			if (rs.next()) {
+				String idUsuario = rs.getString("idUsuario");
+				int idRol = rs.getInt("idRol");
+				String idPersona = rs.getString("idPersona");
+
+				Usuario usuarioLogin = new Usuario(idUsuario, usuario, contrasena, idRol, idPersona);
+				loginUsuario = usuarioLogin;
 				login = true;
 			}
+
+			rs.close();
+			ps.close();
+			miConexion.cerrarConexion();  // Cierra la conexión al final
+
+		} catch (SQLException e) {
+			e.printStackTrace();
 		}
+
 		return login;
 	}
 

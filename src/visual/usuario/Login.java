@@ -49,7 +49,7 @@ public class Login extends JDialog {
 			try {
 				clinica2 = new FileOutputStream("clinica.dat");
 				clinicaWrite = new ObjectOutputStream(clinica2);
-				Usuario aux = new Usuario("U-1", "admin", "admin",1,1);
+				Usuario aux = new Usuario("U-1", "admin", "admin",1,"");
 				ClinicaMedica.getInstance().regUser(aux);
 				clinicaWrite.writeObject(ClinicaMedica.getInstance());
 				clinicaWrite.writeObject(ClinicaMedica.getCodVacuna());
