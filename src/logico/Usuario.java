@@ -9,13 +9,13 @@ public class Usuario implements Serializable {
 	 */
 	private static final long serialVersionUID = 1L;
 	
-	private int idUsuario;
+	private String idUsuario;
 	private String usuario;
 	private String contrasenia;
 	private int idRol;
 	private int idPersona;
 	
-	public Usuario(int idUsuario, String usuario, String contrasenia, int idRol, int idPersona) {
+	public Usuario(String idUsuario, String usuario, String contrasenia, int idRol, int idPersona) {
 		super();
 		this.idUsuario = idUsuario;
 		this.usuario = usuario;
@@ -24,11 +24,11 @@ public class Usuario implements Serializable {
 		this.idPersona = idPersona;
 	}
 
-	public int getIdUsuario() {
+	public String getIdUsuario() {
 		return idUsuario;
 	}
 
-	public void setIdUsuario(int idUsuario) {
+	public void setIdUsuario(String idUsuario) {
 		this.idUsuario = idUsuario;
 	}
 

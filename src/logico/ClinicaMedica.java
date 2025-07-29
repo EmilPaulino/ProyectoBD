@@ -472,7 +472,7 @@ public class ClinicaMedica implements Serializable {
 	public boolean confirmarLogin(String usuario, String contrasena) {
 		boolean login = false;
 		for(Usuario usua : losUsuarios) {
-			if(usua.getNombre().equalsIgnoreCase(usuario) && usua.getContrasena().equalsIgnoreCase(contrasena)) {
+			if(usua.getUsuario().equalsIgnoreCase(usuario) && usua.getContrasenia().equalsIgnoreCase(contrasena)) {
 				loginUsuario = usua;
 				login = true;
 			}
