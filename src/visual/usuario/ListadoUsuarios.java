@@ -7,6 +7,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
+import java.util.Map;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
@@ -132,14 +133,16 @@ public class ListadoUsuarios extends JDialog {
 
 	public static void loadUsuarios() {
 		modelo.setRowCount(0);
+		Map<Integer, String> roles = ClinicaMedica.getInstance().cargarRoles();
 		ArrayList<Usuario> usua = ClinicaMedica.getInstance().getLosUsuarios();
 		row = new Object[table.getColumnCount()];
-		for(Usuario usuario:usua) {
-			row[0] = usuario.getCodigo();
-	        row[1] = usuario.getNombre();
-	        row[2] = usuario.getRol();
-	        modelo.addRow(row);
+		for (Usuario usuario : usua) {
+		    row[0] = usuario.getIdUsuario();
+		    row[1] = usuario.getUsuario();
+		    row[2] = roles.get(usuario.getIdRol()); // Nombre del rol aquí
+		    modelo.addRow(row);
 		}
+
 		
 	}
 

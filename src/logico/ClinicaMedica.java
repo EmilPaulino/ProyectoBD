@@ -7,8 +7,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 import conexionsql.Conexion;
+import visual.usuario.Personal;
 
 public class ClinicaMedica implements Serializable {
 	
@@ -27,7 +30,38 @@ public class ClinicaMedica implements Serializable {
 
 	
 	public ArrayList<Usuario> getLosUsuarios() {
-		return losUsuarios;
+	    ArrayList<Usuario> usuarios = new ArrayList<>();
+
+	    try {
+	        Conexion conexion = new Conexion();
+	        Connection conn = conexion.getConexion();
+
+	        String query = "SELECT u.idUsuario, u.usuario, u.contrasenia, u.idRol, r.descripcion, u.idPersona " +
+	                "FROM Usuario u " +
+	                "JOIN Rol r ON u.idRol = r.idRol";
+
+	        PreparedStatement ps = conn.prepareStatement(query);
+	        ResultSet rs = ps.executeQuery();
+
+	        while (rs.next()) {
+	            String idUsuario = rs.getString("idUsuario");
+	            String usuario = rs.getString("usuario");
+	            String contrasenia = rs.getString("contrasenia");
+	            int idRol = rs.getInt("idRol");
+	            String idPersona = rs.getString("idPersona");
+
+	            Usuario u = new Usuario(idUsuario, usuario, contrasenia, idRol, idPersona);
+	            usuarios.add(u);
+	        }
+
+	        rs.close();
+	        ps.close();
+	        conexion.cerrarConexion();
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	    }
+
+	    return usuarios;
 	}
 
 	public void setLosUsuarios(ArrayList<Usuario> losUsuarios) {
@@ -568,17 +602,91 @@ public class ClinicaMedica implements Serializable {
 	
 	public Usuario buscarUsuarioByCodigo(String codigo) {
 		Usuario usuario = null;
-		boolean encontrado = false;
-	    int i = 0;
-	    while (!encontrado && i < losUsuarios.size()) { 
-	        if (losUsuarios.get(i).getCodigo().equals(codigo)) { 
-	        	usuario = losUsuarios.get(i); 
-	            encontrado = true; 
+	    String sql = "SELECT u.idUsuario, u.usuario, u.contrasenia, u.idRol, u.idPersona " +
+	                 "FROM Usuario u WHERE u.idUsuario = ?";
+	    try (Connection conn = new Conexion().getConexion();
+	         PreparedStatement ps = conn.prepareStatement(sql)) {
+	         
+	        ps.setString(1, codigo);
+	        try (ResultSet rs = ps.executeQuery()) {
+	            if (rs.next()) {
+	                String idUsuario = rs.getString("idUsuario");
+	                String usuarioStr = rs.getString("usuario");
+	                String contrasenia = rs.getString("contrasenia");
+	                int idRol = rs.getInt("idRol");
+	                String idPersona = rs.getString("idPersona");
+
+	                usuario = new Usuario(idUsuario, usuarioStr, contrasenia, idRol, idPersona);
+	            }
 	        }
-	        i++; 
+	    } catch (SQLException e) {
+	        e.printStackTrace();
 	    }
 	    return usuario;
 	}
+
+	public Map<Integer, String> cargarRoles() {
+	    Map<Integer, String> roles = new HashMap<>();
+	    String sql = "SELECT idRol, descripcion FROM Rol";
+
+	    try (Connection conn = new Conexion().getConexion();
+	         PreparedStatement ps = conn.prepareStatement(sql);
+	         ResultSet rs = ps.executeQuery()) {
+
+	        while (rs.next()) {
+	            roles.put(rs.getInt("idRol"), rs.getString("descripcion"));
+	        }
+
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	    }
+	    return roles;
+	}
+
+	public Medico buscarMedicoByIdPersona(String idPersona) {
+	    Medico medico = null;
+	    String sql = "SELECT m.idPersona, m.exequatur, m.idEspecialidad, " +
+	                 "p.nombre, p.apellido, p.cedula, p.telefono, p.direccion, "
+	                 + "p.fechaNacimiento, p.sexo" +
+	                 "FROM Medico m " +
+	                 "JOIN Persona p ON m.idPersona = p.idPersona " +
+	                 "WHERE m.idPersona = ?";
+
+	    try (Connection conn = new Conexion().getConexion();
+	         PreparedStatement ps = conn.prepareStatement(sql)) {
+
+	        ps.setString(1, idPersona);
+
+	        try (ResultSet rs = ps.executeQuery()) {
+	            if (rs.next()) {
+	                String id = rs.getString("idPersona");
+	                String cedula = rs.getString("cedula");
+	                String nombre = rs.getString("nombre");
+	                String apellido = rs.getString("apellido");
+	                String telefono = rs.getString("telefono");
+	                String direccion = rs.getString("direccion");
+	                Date fechaNacimiento = rs.getDate("fechaNacimiento");
+	                char sexo = rs.getString("sexo").charAt(0);
+	                int idEspecialidad = rs.getInt("idEspecialidad");
+	                int exequatur = rs.getInt("exequatur");
+
+	                medico = new Medico(id, cedula, nombre, apellido, telefono, direccion, fechaNacimiento,
+	                		sexo, idEspecialidad, exequatur);
+	            }
+	        }
+
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	    }
+
+	    return medico;
+	}
+
+	public Personal buscarPersonalbyIdPersona(String idPersona) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 
 
 }
