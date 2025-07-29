@@ -1,52 +1,59 @@
-package visual;
+package visual.medico;
+
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.util.ArrayList;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JPanel;
+import javax.swing.border.EmptyBorder;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
-import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.table.DefaultTableModel;
 
 import logico.ClinicaMedica;
-import logico.Medico;
+import logico.Consulta;
+import logico.Paciente;
+import visual.consulta.RegistroConsulta;
 
-public class ListadoMedicos extends JDialog {
+import java.awt.event.ActionListener;
+import java.util.ArrayList;
+import java.awt.event.ActionEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+
+public class HistorialMedico extends JDialog {
+
 	private final JPanel contentPanel = new JPanel();
-	private static JTable table;
-	private int index = -1;
 	private static DefaultTableModel modelo;
+	private static JTable table;
 	private static Object[] row;
+	private int index = -1;
+	private Paciente selected = null;
+	private Consulta sel;
 	private JButton btnDetalle;
-	private JButton btnModificar;
-	private Medico selected;
-	
-	/** 
+
+	/**
 	 * Launch the application.
 	 */
 	public static void main(String[] args) {
 		try {
-			ListadoMedicos dialog = new ListadoMedicos();
+			HistorialMedico dialog = new HistorialMedico(null);
 			dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 			dialog.setVisible(true);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
+
 	/**
 	 * Create the dialog.
 	 */
-	public ListadoMedicos() {
-		setTitle("Listado de m\u00E9dicos");
-		setBounds(100, 100, 613, 372);
+	public HistorialMedico(Paciente aux) {
+		selected = aux;
+		setTitle("Historial m\u00E9dico "+selected.getNombre());
+		setBounds(100, 100, 596, 376);
 		getContentPane().setLayout(new BorderLayout());
 		contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		getContentPane().add(contentPanel, BorderLayout.CENTER);
@@ -67,14 +74,13 @@ public class ListadoMedicos extends JDialog {
 							index = table.getSelectedRow();
 							if(index >= 0) {
 								btnDetalle.setEnabled(true);
-								btnModificar.setEnabled(true);
 								String codigo = table.getValueAt(index, 0).toString();
-								selected = ClinicaMedica.getInstance().buscarMedicoByCedula(codigo);
+								sel = ClinicaMedica.getInstance().buscarConsultaById(codigo);
 							}
 						}
 					});
 					modelo = new DefaultTableModel();
-					String[] identificadores = {"Cédula", "Nombre", "Apellido", "Teléfono"};
+					String[] identificadores = {"Código", "Fecha", "Diagnóstico", "Médico"};
 					modelo.setColumnIdentifiers(identificadores);
 					table.setModel(modelo);
 					scrollPane.setViewportView(table);
@@ -89,11 +95,12 @@ public class ListadoMedicos extends JDialog {
 			{
 				btnDetalle = new JButton("Ver detalle");
 				btnDetalle.addActionListener(new ActionListener() {
-					@Override
 					public void actionPerformed(ActionEvent e) {
-						DetalleMedico dm = new DetalleMedico(selected);
-						dm.setModal(true);
-						dm.setVisible(true);
+						if(sel != null) {
+							RegistroConsulta rc = new RegistroConsulta(sel);
+							rc.setModal(true);
+							rc.setVisible(true);
+						}
 					}
 				});
 				btnDetalle.setEnabled(false);
@@ -102,22 +109,8 @@ public class ListadoMedicos extends JDialog {
 				getRootPane().setDefaultButton(btnDetalle);
 			}
 			{
-				btnModificar = new JButton("Modificar");
-				btnModificar.addActionListener(new ActionListener() {
-					@Override
-					public void actionPerformed(ActionEvent e) {
-						RegistroMedico rm = new RegistroMedico(selected);
-						rm.setModal(true);
-						rm.setVisible(true);
-					}
-				});
-				btnModificar.setEnabled(false);
-				buttonPane.add(btnModificar);
-			}
-			{
 				JButton btnCancelar = new JButton("Cancelar");
 				btnCancelar.addActionListener(new ActionListener() {
-					@Override
 					public void actionPerformed(ActionEvent e) {
 						dispose();
 					}
@@ -125,19 +118,21 @@ public class ListadoMedicos extends JDialog {
 				btnCancelar.setActionCommand("Cancel");
 				buttonPane.add(btnCancelar);
 			}
-			loadMedicos();
 		}
+		loadHistorial();
 	}
-	public static void loadMedicos() {
-		modelo.setRowCount(0);
-		ArrayList<Medico> med = ClinicaMedica.getInstance().getLosMedicos();
-		row = new Object[table.getColumnCount()];
-		for(Medico medico : med) {
-			row[0] = medico.getCedula();
-			row[1] = medico.getNombre();
-			row[2] = medico.getApellido();
-			row[3] = medico.getTelefono();
-			modelo.addRow(row);
+	private void loadHistorial(){
+		if(selected!=null) {
+			modelo.setRowCount(0);
+			//ArrayList<Consulta> consultas = selected.getMiHistorial().getLasConsultas();
+			row = new Object[table.getColumnCount()];
+			for(Consulta consulta:selected.getMiHistorial().getLasConsultas()) {
+				row[0] = consulta.getIdConsulta();
+				row[1] = consulta.getFecha();
+				row[2] = consulta.getDiagnostico();
+				row[3] = consulta.getMedico().getNombre()+" "+consulta.getMedico().getApellido();
+				modelo.addRow(row);
+			}
 		}
 	}
 }

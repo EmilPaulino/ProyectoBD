@@ -1,55 +1,49 @@
-package visual;
-
+package visual.vacuna;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JPanel;
-import javax.swing.border.EmptyBorder;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.table.DefaultTableModel;
 
-import logico.ClinicaMedica;
-import logico.Medico;
+import logico.Paciente;
+import logico.Vacuna;
 
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.util.ArrayList;
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
-
-public class SeleccionarMedico extends JDialog {
-
+public class ListadoVacunas extends JDialog {
 	private final JPanel contentPanel = new JPanel();
+	private static JTable table;
 	private static DefaultTableModel modelo;
 	private static Object[] row;
-	private static JTable table;
-	private int index = -1;
-	private Medico selected;
-	private JButton btnSeleccionar;
-
+	private Paciente paciente;
+	
 	/**
 	 * Launch the application.
 	 */
 	public static void main(String[] args) {
 		try {
-			SeleccionarMedico dialog = new SeleccionarMedico();
+			ListadoVacunas dialog = new ListadoVacunas(null);
 			dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 			dialog.setVisible(true);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
-
 	/**
 	 * Create the dialog.
 	 */
-	public SeleccionarMedico() {
-		setTitle("Seleccionar m\u00E9dico");
-		setBounds(100, 100, 616, 388);
+	public ListadoVacunas(Paciente pac) {
+		paciente = pac;
+		setTitle("Listado de vacunas");
+		setBounds(100, 100, 582, 355);
 		getContentPane().setLayout(new BorderLayout());
 		contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		getContentPane().add(contentPanel, BorderLayout.CENTER);
@@ -64,47 +58,23 @@ public class SeleccionarMedico extends JDialog {
 				panel.add(scrollPane, BorderLayout.CENTER);
 				{
 					table = new JTable();
-					table.addMouseListener(new MouseAdapter() {
-						@Override
-						public void mouseClicked(MouseEvent e) {
-							index = table.getSelectedRow();
-							if(index >= 0) {
-								btnSeleccionar.setEnabled(true);
-								String codigo = table.getValueAt(index, 0).toString();
-								selected = ClinicaMedica.getInstance().buscarMedicoById(codigo);
-							}
-						}
-					});
 					modelo = new DefaultTableModel();
-					String[] identificadores = {"Código", "Nombre", "Apellido", "Especialidad"};
+					String[] identificadores = {"Código", "Nombre", "Tipo", "Fabricante", "Fecha Vencimiento"};
 					modelo.setColumnIdentifiers(identificadores);
 					table.setModel(modelo);
 					scrollPane.setViewportView(table);
 				}
 			}
-		}
+		} 
 		{
 			JPanel buttonPane = new JPanel();
 			buttonPane.setBorder(new TitledBorder(null, "", TitledBorder.LEADING, TitledBorder.TOP, null, null));
 			buttonPane.setLayout(new FlowLayout(FlowLayout.RIGHT));
 			getContentPane().add(buttonPane, BorderLayout.SOUTH);
 			{
-				btnSeleccionar = new JButton("Seleccionar");
-				btnSeleccionar.addActionListener(new ActionListener() {
-					public void actionPerformed(ActionEvent e) {
-						if(selected != null) {
-							dispose();
-						}
-					}
-				});
-				btnSeleccionar.setEnabled(false);
-				btnSeleccionar.setActionCommand("OK");
-				buttonPane.add(btnSeleccionar);
-				getRootPane().setDefaultButton(btnSeleccionar);
-			}
-			{
 				JButton btnCancelar = new JButton("Cancelar");
 				btnCancelar.addActionListener(new ActionListener() {
+					@Override
 					public void actionPerformed(ActionEvent e) {
 						dispose();
 					}
@@ -113,23 +83,21 @@ public class SeleccionarMedico extends JDialog {
 				buttonPane.add(btnCancelar);
 			}
 		}
-		loadMedicos();
+		loadVacunas();
 	}
-	private void loadMedicos() {
+	private void loadVacunas() {
+	    SimpleDateFormat dateFormatter = new SimpleDateFormat("dd/MM/yyyy");
+
 		modelo.setRowCount(0);
-		ArrayList<Medico> selected = ClinicaMedica.getInstance().getLosMedicos();
+		ArrayList<Vacuna> vac = paciente.getMisVacunas();
 		row = new Object[table.getColumnCount()];
-		for(Medico medico:selected) {
-			row[0] = medico.getIdPersona();
-			row[1] = medico.getNombre();
-			row[2] = medico.getApellido();
-			row[3] = medico.getEspecialidad();
-			modelo.addRow(row);
+		for(Vacuna vacunas:vac) {
+			row[0] = vacunas.getIdVacuna();
+		    row[1] = vacunas.getNombreVacuna();
+	        row[2] = vacunas.getTipo();
+		    row[3] = vacunas.getFabricante();
+		    row[4] = dateFormatter.format(vacunas.getFecha());
+		    modelo.addRow(row);
 		}
 	}
-	
-	public Medico getSelectedMedico() {
-		return selected;
-	}
-
 }

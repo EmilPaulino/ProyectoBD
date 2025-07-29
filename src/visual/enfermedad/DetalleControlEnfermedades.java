@@ -1,4 +1,4 @@
-package visual;
+package visual.enfermedad;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
@@ -7,36 +7,32 @@ import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
-import javax.swing.border.TitledBorder;
-import javax.swing.table.DefaultTableModel;
 
 import logico.ClinicaMedica;
 import logico.Enfermedad;
+import logico.Paciente;
 
+import java.awt.event.ActionListener;
+import java.util.ArrayList;
+import java.awt.event.ActionEvent;
+import javax.swing.border.TitledBorder;
+import javax.swing.table.DefaultTableModel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.util.ArrayList;
 
-public class ControlEnfermedades extends JDialog {
+public class DetalleControlEnfermedades extends JDialog {
 
 	private final JPanel contentPanel = new JPanel();
+	private Enfermedad enfermedad;
 	private static JTable table;
 	private static DefaultTableModel modelo;
-	private static Object[] row;	
-	private Enfermedad enfermedad;
-	private int index = -1;
-	private JButton btnDetalle;
-
+	private static Object[] row;
 	/**
 	 * Launch the application.
 	 */
 	public static void main(String[] args) {
 		try {
-			ControlEnfermedades dialog = new ControlEnfermedades();
+			DetalleControlEnfermedades dialog = new DetalleControlEnfermedades(null);
 			dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 			dialog.setVisible(true);
 		} catch (Exception e) {
@@ -47,9 +43,10 @@ public class ControlEnfermedades extends JDialog {
 	/**
 	 * Create the dialog.
 	 */
-	public ControlEnfermedades() {
-		setTitle("Control de enfermedades");
-		setBounds(100, 100, 654, 402);
+	public DetalleControlEnfermedades(Enfermedad enf) {
+		setTitle("Listado de paciented diagnosticados con "+enf.getNombre());
+		enfermedad = enf;
+		setBounds(100, 100, 604, 377);
 		getContentPane().setLayout(new BorderLayout());
 		contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		getContentPane().add(contentPanel, BorderLayout.CENTER);
@@ -64,19 +61,8 @@ public class ControlEnfermedades extends JDialog {
 				panel.add(scrollPane, BorderLayout.CENTER);
 				{
 					table = new JTable();
-					table.addMouseListener(new MouseAdapter() {
-						@Override
-						public void mouseClicked(MouseEvent e) {
-							index = table.getSelectedRow();
-							if(index >= 0) {
-								btnDetalle.setEnabled(true);
-								String codigo = table.getValueAt(index, 0).toString();
-								enfermedad = ClinicaMedica.getInstance().buscarEnfermedadByCodigo(codigo);
-							}
-						}
-					});
 					modelo = new DefaultTableModel();
-					String[] identificadores = {"Código", "Nombre", "Tipo", "Pacientes Diagnosticados"};
+					String[] identificadores = {"Cédula", "Nombre", "Apellido", "Teléfono"};
 					modelo.setColumnIdentifiers(identificadores);
 					table.setModel(modelo);
 					scrollPane.setViewportView(table);
@@ -89,23 +75,6 @@ public class ControlEnfermedades extends JDialog {
 			buttonPane.setLayout(new FlowLayout(FlowLayout.RIGHT));
 			getContentPane().add(buttonPane, BorderLayout.SOUTH);
 			{
-				btnDetalle = new JButton("Ver detalle");
-				btnDetalle.addActionListener(new ActionListener() {
-					public void actionPerformed(ActionEvent e) {
-						if(enfermedad != null) {
-							DetalleControlEnfermedades dce = new DetalleControlEnfermedades(enfermedad);
-							dce.setModal(true);
-							dce.setVisible(true);
-							
-						}
-					}
-				});
-				btnDetalle.setEnabled(false);
-				btnDetalle.setActionCommand("OK");
-				buttonPane.add(btnDetalle);
-				getRootPane().setDefaultButton(btnDetalle);
-			}
-			{
 				JButton btnCancelar = new JButton("Cancelar");
 				btnCancelar.addActionListener(new ActionListener() {
 					public void actionPerformed(ActionEvent e) {
@@ -116,18 +85,21 @@ public class ControlEnfermedades extends JDialog {
 				buttonPane.add(btnCancelar);
 			}
 		}
-		loadEnfermedades();
+		loadPacientes();
 	}
-	private void loadEnfermedades() {
+	private void loadPacientes() {
 		modelo.setRowCount(0);
-		ArrayList<Enfermedad> enf = ClinicaMedica.getInstance().getLasEnfermedades();
+		ArrayList<Paciente> pac = ClinicaMedica.getInstance().getLosPacientes();
 		row = new Object[table.getColumnCount()];
-		for(Enfermedad enfermedad : enf) {
-			row[0] = enfermedad.getIdEnfermedad();
-			row[1] = enfermedad.getNombre();
-			row[2] = enfermedad.getTipo();
-			row[3] = ClinicaMedica.getInstance().getCantPacientesPoseenEnfermedad(enfermedad);
-			modelo.addRow(row);
+		for(Paciente paciente:pac) {
+			if(paciente.getMisEnfermedades().contains(enfermedad)) {
+				row[0] = paciente.getCedula();
+		        row[1] = paciente.getNombre();
+		        row[2] = paciente.getApellido();
+		        row[3] = paciente.getTelefono();
+		        modelo.addRow(row);
+			}
 		}
 	}
+
 }

@@ -1,4 +1,4 @@
-package visual;
+package visual.cita;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
@@ -22,6 +22,7 @@ import javax.swing.border.TitledBorder;
 import logico.Cita;
 import logico.ClinicaMedica;
 import logico.Medico;
+import visual.medico.SeleccionarMedico;
 
 public class RegistroCita extends JDialog {
 

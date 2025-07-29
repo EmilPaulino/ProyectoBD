@@ -1,4 +1,4 @@
-package visual;
+package visual.paciente;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
@@ -7,38 +7,35 @@ import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
-import javax.swing.border.TitledBorder;
 import javax.swing.table.DefaultTableModel;
 
 import logico.ClinicaMedica;
-import logico.Consulta;
+import logico.Medico;
 import logico.Paciente;
-
 import java.awt.event.ActionListener;
-import java.util.ArrayList;
 import java.awt.event.ActionEvent;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.ArrayList;
 
-public class HistorialMedico extends JDialog {
+public class SeleccionarPaciente extends JDialog {
 
 	private final JPanel contentPanel = new JPanel();
-	private static DefaultTableModel modelo;
-	private static JTable table;
-	private static Object[] row;
-	private int index = -1;
 	private Paciente selected = null;
-	private Consulta sel;
-	private JButton btnDetalle;
+	private JButton btnSeleccionar;
+	private static DefaultTableModel modelo;
+	private static Object[] row;
+	private static JTable table;
+	private int index = -1;
 
 	/**
 	 * Launch the application.
 	 */
 	public static void main(String[] args) {
 		try {
-			HistorialMedico dialog = new HistorialMedico(null);
+			SeleccionarPaciente dialog = new SeleccionarPaciente();
 			dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 			dialog.setVisible(true);
 		} catch (Exception e) {
@@ -49,17 +46,15 @@ public class HistorialMedico extends JDialog {
 	/**
 	 * Create the dialog.
 	 */
-	public HistorialMedico(Paciente aux) {
-		selected = aux;
-		setTitle("Historial m\u00E9dico "+selected.getNombre());
-		setBounds(100, 100, 596, 376);
+	public SeleccionarPaciente() {
+		setTitle("Seleccionar paciente");
+		setBounds(100, 100, 593, 386);
 		getContentPane().setLayout(new BorderLayout());
 		contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		getContentPane().add(contentPanel, BorderLayout.CENTER);
 		contentPanel.setLayout(new BorderLayout(0, 0));
 		{
 			JPanel panel = new JPanel();
-			panel.setBorder(new TitledBorder(null, "", TitledBorder.LEADING, TitledBorder.TOP, null, null));
 			contentPanel.add(panel, BorderLayout.CENTER);
 			panel.setLayout(new BorderLayout(0, 0));
 			{
@@ -72,14 +67,14 @@ public class HistorialMedico extends JDialog {
 						public void mouseClicked(MouseEvent e) {
 							index = table.getSelectedRow();
 							if(index >= 0) {
-								btnDetalle.setEnabled(true);
+								btnSeleccionar.setEnabled(true);
 								String codigo = table.getValueAt(index, 0).toString();
-								sel = ClinicaMedica.getInstance().buscarConsultaById(codigo);
+								selected = ClinicaMedica.getInstance().buscarPacienteByCedula(codigo);
 							}
 						}
 					});
 					modelo = new DefaultTableModel();
-					String[] identificadores = {"Código", "Fecha", "Diagnóstico", "Médico"};
+					String[] identificadores = {"Cédula", "Nombre", "Apellido", "Teléfono"};
 					modelo.setColumnIdentifiers(identificadores);
 					table.setModel(modelo);
 					scrollPane.setViewportView(table);
@@ -88,24 +83,21 @@ public class HistorialMedico extends JDialog {
 		}
 		{
 			JPanel buttonPane = new JPanel();
-			buttonPane.setBorder(new TitledBorder(null, "", TitledBorder.LEADING, TitledBorder.TOP, null, null));
 			buttonPane.setLayout(new FlowLayout(FlowLayout.RIGHT));
 			getContentPane().add(buttonPane, BorderLayout.SOUTH);
 			{
-				btnDetalle = new JButton("Ver detalle");
-				btnDetalle.addActionListener(new ActionListener() {
+				btnSeleccionar = new JButton("Seleccionar");
+				btnSeleccionar.addActionListener(new ActionListener() {
 					public void actionPerformed(ActionEvent e) {
-						if(sel != null) {
-							RegistroConsulta rc = new RegistroConsulta(sel);
-							rc.setModal(true);
-							rc.setVisible(true);
+						if(selected != null) {
+							dispose();
 						}
 					}
 				});
-				btnDetalle.setEnabled(false);
-				btnDetalle.setActionCommand("OK");
-				buttonPane.add(btnDetalle);
-				getRootPane().setDefaultButton(btnDetalle);
+				btnSeleccionar.setEnabled(false);
+				btnSeleccionar.setActionCommand("OK");
+				buttonPane.add(btnSeleccionar);
+				getRootPane().setDefaultButton(btnSeleccionar);
 			}
 			{
 				JButton btnCancelar = new JButton("Cancelar");
@@ -118,20 +110,22 @@ public class HistorialMedico extends JDialog {
 				buttonPane.add(btnCancelar);
 			}
 		}
-		loadHistorial();
+		loadPacientes();
 	}
-	private void loadHistorial(){
-		if(selected!=null) {
-			modelo.setRowCount(0);
-			//ArrayList<Consulta> consultas = selected.getMiHistorial().getLasConsultas();
-			row = new Object[table.getColumnCount()];
-			for(Consulta consulta:selected.getMiHistorial().getLasConsultas()) {
-				row[0] = consulta.getIdConsulta();
-				row[1] = consulta.getFecha();
-				row[2] = consulta.getDiagnostico();
-				row[3] = consulta.getMedico().getNombre()+" "+consulta.getMedico().getApellido();
-				modelo.addRow(row);
-			}
+	public static void loadPacientes() {
+		modelo.setRowCount(0);
+		ArrayList<Paciente> pac = ClinicaMedica.getInstance().getLosPacientes();
+		row = new Object[table.getColumnCount()];
+		for(Paciente paciente:pac) {
+			row[0] = paciente.getCedula();
+	        row[1] = paciente.getNombre();
+	        row[2] = paciente.getApellido();
+	        row[3] = paciente.getTelefono();
+	        modelo.addRow(row);
 		}
 	}
+	public Paciente getSelectedPaciente() {
+		return selected;
+	}
+	
 }

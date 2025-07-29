@@ -1,4 +1,4 @@
-package visual;
+package visual.usuario;
 
 import java.awt.BorderLayout;
 import java.awt.EventQueue;
@@ -16,6 +16,7 @@ import javax.swing.border.SoftBevelBorder;
 
 import logico.ClinicaMedica;
 import logico.Usuario;
+import visual.Principal;
 
 public class Login extends JDialog {
 

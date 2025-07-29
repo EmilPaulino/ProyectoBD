@@ -19,6 +19,21 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 
 import logico.ClinicaMedica;
+import visual.cita.ListadoCitas;
+import visual.cita.RegistroCita;
+import visual.consulta.RegistroConsulta;
+import visual.enfermedad.ControlEnfermedades;
+import visual.enfermedad.ListadoEnfermedades;
+import visual.enfermedad.RegistroEnfermedad;
+import visual.medico.ListadoMedicos;
+import visual.medico.RegistroMedico;
+import visual.paciente.ListadoPacientes;
+import visual.paciente.RegistroPaciente;
+import visual.usuario.ListadoUsuarios;
+import visual.usuario.RegistroUsuario;
+import visual.vacuna.ListadoVacunasGeneral;
+import visual.vacuna.RegistroVacuna;
+import visual.vacuna.Vacunar;
 
 public class Principal extends JFrame {
 

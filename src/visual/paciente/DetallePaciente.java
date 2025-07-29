@@ -1,4 +1,4 @@
-package visual;
+package visual.paciente;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -21,6 +21,9 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 
 import logico.Paciente;
+import visual.enfermedad.ListadoEnfermedadesPaciente;
+import visual.medico.HistorialMedico;
+import visual.vacuna.ListadoVacunas;
 
 public class DetallePaciente extends JDialog {
 

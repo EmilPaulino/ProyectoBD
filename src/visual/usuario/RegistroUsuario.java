@@ -1,4 +1,4 @@
-package visual;
+package visual.usuario;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;

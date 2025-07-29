@@ -1,4 +1,4 @@
-package visual;
+package visual.consulta;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -29,6 +29,9 @@ import logico.Consulta;
 import logico.Enfermedad;
 import logico.Medico;
 import logico.Paciente;
+import visual.enfermedad.SeleccionarEnfermedad;
+import visual.paciente.DetallePaciente;
+import visual.paciente.SeleccionarPaciente;
 
 public class RegistroConsulta extends JDialog {
 

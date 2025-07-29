@@ -1,4 +1,4 @@
-package visual;
+package visual.medico;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
@@ -7,28 +7,28 @@ import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
 import javax.swing.border.TitledBorder;
 import javax.swing.table.DefaultTableModel;
 
 import logico.ClinicaMedica;
-import logico.Enfermedad;
+import logico.Medico;
 
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
 
-public class SeleccionarEnfermedad extends JDialog {
+public class SeleccionarMedico extends JDialog {
 
 	private final JPanel contentPanel = new JPanel();
 	private static DefaultTableModel modelo;
 	private static Object[] row;
 	private static JTable table;
 	private int index = -1;
-	private Enfermedad selected;
+	private Medico selected;
 	private JButton btnSeleccionar;
 
 	/**
@@ -36,7 +36,7 @@ public class SeleccionarEnfermedad extends JDialog {
 	 */
 	public static void main(String[] args) {
 		try {
-			SeleccionarEnfermedad dialog = new SeleccionarEnfermedad();
+			SeleccionarMedico dialog = new SeleccionarMedico();
 			dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 			dialog.setVisible(true);
 		} catch (Exception e) {
@@ -47,9 +47,9 @@ public class SeleccionarEnfermedad extends JDialog {
 	/**
 	 * Create the dialog.
 	 */
-	public SeleccionarEnfermedad() {
+	public SeleccionarMedico() {
 		setTitle("Seleccionar m\u00E9dico");
-		setBounds(100, 100, 512, 328);
+		setBounds(100, 100, 616, 388);
 		getContentPane().setLayout(new BorderLayout());
 		contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		getContentPane().add(contentPanel, BorderLayout.CENTER);
@@ -71,12 +71,12 @@ public class SeleccionarEnfermedad extends JDialog {
 							if(index >= 0) {
 								btnSeleccionar.setEnabled(true);
 								String codigo = table.getValueAt(index, 0).toString();
-								selected = ClinicaMedica.getInstance().buscarEnfermedadById(codigo);
+								selected = ClinicaMedica.getInstance().buscarMedicoById(codigo);
 							}
 						}
 					});
 					modelo = new DefaultTableModel();
-					String[] identificadores = {"Codigo", "Nombre", "Tipo"};
+					String[] identificadores = {"Código", "Nombre", "Apellido", "Especialidad"};
 					modelo.setColumnIdentifiers(identificadores);
 					table.setModel(modelo);
 					scrollPane.setViewportView(table);
@@ -92,7 +92,7 @@ public class SeleccionarEnfermedad extends JDialog {
 				btnSeleccionar = new JButton("Seleccionar");
 				btnSeleccionar.addActionListener(new ActionListener() {
 					public void actionPerformed(ActionEvent e) {
-						if(selected!=null) {
+						if(selected != null) {
 							dispose();
 						}
 					}
@@ -113,22 +113,22 @@ public class SeleccionarEnfermedad extends JDialog {
 				buttonPane.add(btnCancelar);
 			}
 		}
-		loadEnfermedades();
+		loadMedicos();
 	}
-
-	private void loadEnfermedades() {
+	private void loadMedicos() {
 		modelo.setRowCount(0);
-		ArrayList<Enfermedad> enf = ClinicaMedica.getInstance().getLasEnfermedades();
+		ArrayList<Medico> selected = ClinicaMedica.getInstance().getLosMedicos();
 		row = new Object[table.getColumnCount()];
-		for(Enfermedad enfermedad : enf) {
-			row[0] = enfermedad.getIdEnfermedad();
-			row[1] = enfermedad.getNombre();
-			row[2] = enfermedad.getTipo();
+		for(Medico medico:selected) {
+			row[0] = medico.getIdPersona();
+			row[1] = medico.getNombre();
+			row[2] = medico.getApellido();
+			row[3] = medico.getEspecialidad();
 			modelo.addRow(row);
 		}
 	}
 	
-	public Enfermedad getSelectedEnfermedad() {
+	public Medico getSelectedMedico() {
 		return selected;
 	}
 

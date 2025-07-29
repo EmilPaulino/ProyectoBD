@@ -1,4 +1,4 @@
-package visual;
+package visual.vacuna;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
@@ -14,6 +14,7 @@ import javax.swing.border.TitledBorder;
 import logico.ClinicaMedica;
 import logico.Paciente;
 import logico.Vacuna;
+import visual.paciente.SeleccionarPaciente;
 
 import javax.swing.UIManager;
 import java.awt.Color;

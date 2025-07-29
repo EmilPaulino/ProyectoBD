@@ -1,17 +1,11 @@
-package visual;
+package visual.enfermedad;
+
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.util.ArrayList;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.table.DefaultTableModel;
@@ -19,33 +13,43 @@ import javax.swing.table.DefaultTableModel;
 import logico.ClinicaMedica;
 import logico.Enfermedad;
 
-public class ListadoEnfermedades extends JDialog {
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.util.ArrayList;
+
+public class ControlEnfermedades extends JDialog {
+
 	private final JPanel contentPanel = new JPanel();
 	private static JTable table;
-	private int index = -1;
 	private static DefaultTableModel modelo;
-	private static Object[] row;
-	private Enfermedad selected;
-	private JButton btnModificar;
-	
+	private static Object[] row;	
+	private Enfermedad enfermedad;
+	private int index = -1;
+	private JButton btnDetalle;
+
 	/**
 	 * Launch the application.
 	 */
 	public static void main(String[] args) {
 		try {
-			ListadoEnfermedades dialog = new ListadoEnfermedades();
+			ControlEnfermedades dialog = new ControlEnfermedades();
 			dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 			dialog.setVisible(true);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
+
 	/**
 	 * Create the dialog.
 	 */
-	public ListadoEnfermedades() {
-		setTitle("Listado de enfermedades");
-		setBounds(100, 100, 611, 375);
+	public ControlEnfermedades() {
+		setTitle("Control de enfermedades");
+		setBounds(100, 100, 654, 402);
 		getContentPane().setLayout(new BorderLayout());
 		contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		getContentPane().add(contentPanel, BorderLayout.CENTER);
@@ -64,15 +68,15 @@ public class ListadoEnfermedades extends JDialog {
 						@Override
 						public void mouseClicked(MouseEvent e) {
 							index = table.getSelectedRow();
-							if(index>=0) {
-								btnModificar.setEnabled(true);
-								String codigo = table.getValueAt(index,0).toString();
-								selected = ClinicaMedica.getInstance().buscarEnfermedadByCodigo(codigo);
+							if(index >= 0) {
+								btnDetalle.setEnabled(true);
+								String codigo = table.getValueAt(index, 0).toString();
+								enfermedad = ClinicaMedica.getInstance().buscarEnfermedadByCodigo(codigo);
 							}
 						}
 					});
 					modelo = new DefaultTableModel();
-					String[] identificadores = {"Codigo", "Nombre", "Tipo"};
+					String[] identificadores = {"Código", "Nombre", "Tipo", "Pacientes Diagnosticados"};
 					modelo.setColumnIdentifiers(identificadores);
 					table.setModel(modelo);
 					scrollPane.setViewportView(table);
@@ -85,24 +89,25 @@ public class ListadoEnfermedades extends JDialog {
 			buttonPane.setLayout(new FlowLayout(FlowLayout.RIGHT));
 			getContentPane().add(buttonPane, BorderLayout.SOUTH);
 			{
-				btnModificar = new JButton("Modificar");
-				btnModificar.addActionListener(new ActionListener() {
-					@Override
+				btnDetalle = new JButton("Ver detalle");
+				btnDetalle.addActionListener(new ActionListener() {
 					public void actionPerformed(ActionEvent e) {
-						RegistroEnfermedad re = new RegistroEnfermedad(selected);
-						re.setModal(true);
-						re.setVisible(true);
+						if(enfermedad != null) {
+							DetalleControlEnfermedades dce = new DetalleControlEnfermedades(enfermedad);
+							dce.setModal(true);
+							dce.setVisible(true);
+							
+						}
 					}
 				});
-				btnModificar.setEnabled(false);
-				btnModificar.setActionCommand("OK");
-				buttonPane.add(btnModificar);
-				getRootPane().setDefaultButton(btnModificar);
+				btnDetalle.setEnabled(false);
+				btnDetalle.setActionCommand("OK");
+				buttonPane.add(btnDetalle);
+				getRootPane().setDefaultButton(btnDetalle);
 			}
 			{
 				JButton btnCancelar = new JButton("Cancelar");
 				btnCancelar.addActionListener(new ActionListener() {
-					@Override
 					public void actionPerformed(ActionEvent e) {
 						dispose();
 					}
@@ -113,7 +118,7 @@ public class ListadoEnfermedades extends JDialog {
 		}
 		loadEnfermedades();
 	}
-	public static void loadEnfermedades() {
+	private void loadEnfermedades() {
 		modelo.setRowCount(0);
 		ArrayList<Enfermedad> enf = ClinicaMedica.getInstance().getLasEnfermedades();
 		row = new Object[table.getColumnCount()];
@@ -121,8 +126,8 @@ public class ListadoEnfermedades extends JDialog {
 			row[0] = enfermedad.getIdEnfermedad();
 			row[1] = enfermedad.getNombre();
 			row[2] = enfermedad.getTipo();
+			row[3] = ClinicaMedica.getInstance().getCantPacientesPoseenEnfermedad(enfermedad);
 			modelo.addRow(row);
 		}
-		
 	}
 }

@@ -1,4 +1,4 @@
-package visual;
+package visual.paciente;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
