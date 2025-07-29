@@ -10,45 +10,45 @@ public class Cita implements Serializable {
 	 */
 	private static final long serialVersionUID = 1L;
 	
-	private String idCita;
-	private String nombrePersona;
-	private Medico medico;
+	private int codCita;
+	private int idPersona;
+	private String nombre;
 	private Date fecha;
 	private Date hora;
 	private String motivo;
 	
-	public Cita(String idCita, String nombrePersona, Medico medico, Date fecha, Date hora, String motivo) {
+	public Cita(int codCita, int idPersona, String nombre, Date fecha, Date hora, String motivo) {
 		super();
-		this.idCita = idCita;
-		this.nombrePersona = nombrePersona;
-		this.medico = medico;
+		this.codCita = codCita;
+		this.idPersona = idPersona;
+		this.nombre = nombre;
 		this.fecha = fecha;
 		this.hora = hora;
 		this.motivo = motivo;
 	}
 
-	public String getIdCita() {
-		return idCita;
+	public int getCodCita() {
+		return codCita;
 	}
 
-	public void setIdCita(String idCita) {
-		this.idCita = idCita;
+	public void setCodCita(int codCita) {
+		this.codCita = codCita;
 	}
 
-	public String getNombrePersona() {
-		return nombrePersona;
+	public int getIdPersona() {
+		return idPersona;
 	}
 
-	public void setNombrePersona(String nombrePersona) {
-		this.nombrePersona = nombrePersona;
+	public void setIdPersona(int idPersona) {
+		this.idPersona = idPersona;
 	}
 
-	public Medico getMedico() {
-		return medico;
+	public String getNombre() {
+		return nombre;
 	}
 
-	public void setMedico(Medico medico) {
-		this.medico = medico;
+	public void setNombre(String nombre) {
+		this.nombre = nombre;
 	}
 
 	public Date getFecha() {

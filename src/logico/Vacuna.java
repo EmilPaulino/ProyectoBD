@@ -10,63 +10,70 @@ public class Vacuna implements Serializable {
 	 */
 	private static final long serialVersionUID = 1L;
 	
-	private String idVacuna;
+	private int idVacuna;
+	private String nombre;
+	private int codTipoVacuna;
+	private int idFabricante;
 	private Date fechaVencimiento;
-	private String nombreVacuna;
-	private String tipo;
-	private String fabricante;
-	private int cantidad;
+	private int cantStock;
 	
-	public Vacuna(String idVacuna, Date fecha, String nombreVacuna, String tipo, String fabricante, int cantidad) {
+	public Vacuna(int idVacuna, String nombre, int codTipoVacuna, int idFabricante, Date fechaVencimiento,
+			int cantStock) {
 		super();
 		this.idVacuna = idVacuna;
-		this.fechaVencimiento = fecha;
-		this.nombreVacuna = nombreVacuna;
-		this.tipo = tipo;
-		this.fabricante = fabricante;
-		this.cantidad = cantidad;
-	}
-	
-	public int getCantidad() {
-		return cantidad;
+		this.nombre = nombre;
+		this.codTipoVacuna = codTipoVacuna;
+		this.idFabricante = idFabricante;
+		this.fechaVencimiento = fechaVencimiento;
+		this.cantStock = cantStock;
 	}
 
-	public void setCantidad(int cantidad) {
-		this.cantidad = cantidad;
-	}
-
-	public String getIdVacuna() {
+	public int getIdVacuna() {
 		return idVacuna;
 	}
-	public void setIdVacuna(String idVacuna) {
+
+	public void setIdVacuna(int idVacuna) {
 		this.idVacuna = idVacuna;
 	}
-	public Date getFecha() {
+
+	public String getNombre() {
+		return nombre;
+	}
+
+	public void setNombre(String nombre) {
+		this.nombre = nombre;
+	}
+
+	public int getCodTipoVacuna() {
+		return codTipoVacuna;
+	}
+
+	public void setCodTipoVacuna(int codTipoVacuna) {
+		this.codTipoVacuna = codTipoVacuna;
+	}
+
+	public int getIdFabricante() {
+		return idFabricante;
+	}
+
+	public void setIdFabricante(int idFabricante) {
+		this.idFabricante = idFabricante;
+	}
+
+	public Date getFechaVencimiento() {
 		return fechaVencimiento;
 	}
-	public void setFecha(Date fecha) {
-		this.fechaVencimiento = fecha;
-	}
-	public String getNombreVacuna() {
-		return nombreVacuna;
-	}
-	public void setNombreVacuna(String nombreVacuna) {
-		this.nombreVacuna = nombreVacuna;
-	}
-	public String getTipo() {
-		return tipo;
-	}
-	public void setTipo(String tipo) {
-		this.tipo = tipo;
+
+	public void setFechaVencimiento(Date fechaVencimiento) {
+		this.fechaVencimiento = fechaVencimiento;
 	}
 
-	public String getFabricante() {
-		return fabricante;
+	public int getCantStock() {
+		return cantStock;
 	}
 
-	public void setFabricante(String fabricante) {
-		this.fabricante = fabricante;
+	public void setCantStock(int cantStock) {
+		this.cantStock = cantStock;
 	}
-	
 	
 }

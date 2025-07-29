@@ -9,66 +9,59 @@ public class Usuario implements Serializable {
 	 */
 	private static final long serialVersionUID = 1L;
 	
-	private String codigo;
-	private String nombre;
-	private String contrasena;
-	private String rol;
-	private Medico medicoRelacionado;
+	private int idUsuario;
+	private String usuario;
+	private String contrasenia;
+	private int idRol;
+	private int idPersona;
 	
-	public Usuario(String codigo,String nombre, String contrasena, String rol, Medico medicoRelacionado) {
+	public Usuario(int idUsuario, String usuario, String contrasenia, int idRol, int idPersona) {
 		super();
-		this.codigo = codigo;
-		this.nombre = nombre;
-		this.contrasena = contrasena;
-		this.rol = rol;
-		this.medicoRelacionado = medicoRelacionado;
+		this.idUsuario = idUsuario;
+		this.usuario = usuario;
+		this.contrasenia = contrasenia;
+		this.idRol = idRol;
+		this.idPersona = idPersona;
 	}
 
-	
-	public Medico getMedicoRelacionado() {
-		return medicoRelacionado;
+	public int getIdUsuario() {
+		return idUsuario;
 	}
 
-
-	public void setMedicoRelacionado(Medico medicoRelacionado) {
-		this.medicoRelacionado = medicoRelacionado;
+	public void setIdUsuario(int idUsuario) {
+		this.idUsuario = idUsuario;
 	}
 
-
-	public String getCodigo() {
-		return codigo;
+	public String getUsuario() {
+		return usuario;
 	}
 
-
-	public void setCodigo(String codigo) {
-		this.codigo = codigo;
+	public void setUsuario(String usuario) {
+		this.usuario = usuario;
 	}
 
-
-	public String getNombre() {
-		return nombre;
+	public String getContrasenia() {
+		return contrasenia;
 	}
 
-	public void setNombre(String nombre) {
-		this.nombre = nombre;
+	public void setContrasenia(String contrasenia) {
+		this.contrasenia = contrasenia;
 	}
 
-	public String getContrasena() {
-		return contrasena;
+	public int getIdRol() {
+		return idRol;
 	}
 
-	public void setContrasena(String contrasena) {
-		this.contrasena = contrasena;
+	public void setIdRol(int idRol) {
+		this.idRol = idRol;
 	}
 
-	public String getRol() {
-		return rol;
+	public int getIdPersona() {
+		return idPersona;
 	}
 
-	public void setRol(String rol) {
-		this.rol = rol;
+	public void setIdPersona(int idPersona) {
+		this.idPersona = idPersona;
 	}
-	
-	
 	
 }

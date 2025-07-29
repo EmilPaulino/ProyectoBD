@@ -10,53 +10,46 @@ public class Consulta implements Serializable{
 	 */
 	private static final long serialVersionUID = 1L;
 	
-	private String idConsulta;
+	private String codConsulta;
+	private int idPersona;
 	private Date fecha;
-	private Medico medico;
-	private Paciente paciente;
 	private String diagnostico;
 	private String indicacion;
-	private boolean importante;
+	private boolean esImportante;
 	
-	public Consulta(String idConsulta, Medico medico, Paciente paciente, String diagnostico,
-			String indicacion, boolean importante) {
+	public Consulta(String codConsulta, int idPersona, Date fecha, String diagnostico, String indicacion,
+			boolean esImportante) {
 		super();
-		this.idConsulta = idConsulta;
-		this.fecha = new Date();
-		this.medico = medico;
-		this.paciente = paciente;
+		this.codConsulta = codConsulta;
+		this.idPersona = idPersona;
+		this.fecha = fecha;
 		this.diagnostico = diagnostico;
 		this.indicacion = indicacion;
-		this.importante = importante;
+		this.esImportante = esImportante;
 	}
 
-	public String getIdConsulta() {
-		return idConsulta;
+	public String getCodConsulta() {
+		return codConsulta;
 	}
 
-	public void setIdConsulta(String idConsulta) {
-		this.idConsulta = idConsulta;
+	public void setCodConsulta(String codConsulta) {
+		this.codConsulta = codConsulta;
+	}
+
+	public int getIdPersona() {
+		return idPersona;
+	}
+
+	public void setIdPersona(int idPersona) {
+		this.idPersona = idPersona;
 	}
 
 	public Date getFecha() {
 		return fecha;
 	}
 
-
-	public Medico getMedico() {
-		return medico;
-	}
-
-	public void setMedico(Medico medico) {
-		this.medico = medico;
-	}
-
-	public Paciente getPaciente() {
-		return paciente;
-	}
-
-	public void setPaciente(Paciente paciente) {
-		this.paciente = paciente;
+	public void setFecha(Date fecha) {
+		this.fecha = fecha;
 	}
 
 	public String getDiagnostico() {
@@ -75,11 +68,12 @@ public class Consulta implements Serializable{
 		this.indicacion = indicacion;
 	}
 
-	public boolean isImportante() {
-		return importante;
+	public boolean isEsImportante() {
+		return esImportante;
 	}
 
-	public void setImportante(boolean importante) {
-		this.importante = importante;
+	public void setEsImportante(boolean esImportante) {
+		this.esImportante = esImportante;
 	}
+	
 }
