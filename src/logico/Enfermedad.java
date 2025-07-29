@@ -9,55 +9,49 @@ public class Enfermedad implements Serializable {
 	 */
 	private static final long serialVersionUID = 1L;
 	
-	private String idEnfermedad;
+	private int idEnfermedad;
 	private String nombre;
 	private String sintomas;
-	private String tipo;
-	private boolean curada;
+	private int idTipoEnfermedad;
 	
-	public Enfermedad(String idEnfermedad, String nombre, String sintomas, String tipo) {
+	public Enfermedad(int idEnfermedad, String nombre, String sintomas, int idTipoEnfermedad) {
 		super();
 		this.idEnfermedad = idEnfermedad;
 		this.nombre = nombre;
 		this.sintomas = sintomas;
-		this.tipo = tipo;
-	}
-	
-	
-	public boolean isCurada() {
-		return curada;
+		this.idTipoEnfermedad = idTipoEnfermedad;
 	}
 
-	public void setCurada(boolean curada) {
-		this.curada = curada;
-	}
-
-
-
-	public String getIdEnfermedad() {
+	public int getIdEnfermedad() {
 		return idEnfermedad;
 	}
-	public void setIdEnfermedad(String idEnfermedad) {
+
+	public void setIdEnfermedad(int idEnfermedad) {
 		this.idEnfermedad = idEnfermedad;
 	}
+
 	public String getNombre() {
 		return nombre;
 	}
+
 	public void setNombre(String nombre) {
 		this.nombre = nombre;
 	}
+
 	public String getSintomas() {
 		return sintomas;
 	}
+
 	public void setSintomas(String sintomas) {
 		this.sintomas = sintomas;
 	}
-	public String getTipo() {
-		return tipo;
+
+	public int getIdTipoEnfermedad() {
+		return idTipoEnfermedad;
 	}
-	public void setTipo(String tipo) {
-		this.tipo = tipo;
+
+	public void setIdTipoEnfermedad(int idTipoEnfermedad) {
+		this.idTipoEnfermedad = idTipoEnfermedad;
 	}
-	
 	
 }
