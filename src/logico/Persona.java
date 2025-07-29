@@ -17,10 +17,10 @@ public abstract class Persona implements Serializable {
 	protected String telefono;
 	protected String direccion;
 	protected Date fechaNacimiento;
-	protected String sexo;
+	protected char sexo;
 		
 	public Persona(String idPersona, String cedula, String nombre, String apellido, String telefono, String direccion,
-			Date fechaNacimiento, String sexo) {
+			Date fechaNacimiento, char sexo) {
 		super();
 		this.idPersona = idPersona;
 		this.cedula = cedula;
@@ -74,10 +74,10 @@ public abstract class Persona implements Serializable {
 	public void setFechaNacimiento(Date fechaNacimiento) {
 		this.fechaNacimiento = fechaNacimiento;
 	}
-	public String getSexo() {
+	public char getSexo() {
 		return sexo;
 	}
-	public void setSexo(String sexo) {
+	public void setSexo(char sexo) {
 		this.sexo = sexo;
 	}
 	

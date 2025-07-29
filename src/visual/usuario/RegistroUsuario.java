@@ -194,15 +194,15 @@ public class RegistroUsuario extends JDialog {
 					            	return;
 							}
 							
-							Usuario usuario = new Usuario(codigo,nombre,confContra,rol,medicoSeleccionado);
+							//Usuario usuario = new Usuario(codigo,nombre,confContra,rol,medicoSeleccionado);
 							
 							ClinicaMedica.getInstance().regUser(usuario);
 							JOptionPane.showMessageDialog(null,"Operacion exitosa","Informacion",JOptionPane.INFORMATION_MESSAGE);
 							clean();
 						} else {
-							selected.setNombre(txtNombre.getText());
-							selected.setContrasena(txtContrasenia.getText());
-							selected.setRol((String)cbxRol.getSelectedItem());
+							selected.setUsuario(txtNombre.getText());
+							selected.setContrasenia(txtContrasenia.getText());
+							//selected.setIdRol((String)cbxRol.getSelectedItem());
 							ClinicaMedica.getInstance().updateUsuario(selected);
 							ListadoUsuarios.loadUsuarios();
 							JOptionPane.showMessageDialog(null,"Operacion exitosa","Informacion",JOptionPane.INFORMATION_MESSAGE);
@@ -243,10 +243,10 @@ public class RegistroUsuario extends JDialog {
 	
 	private void loadUsuarios() {
 		if(selected!=null) {
-			txtCodigo.setText(selected.getCodigo());
-			txtNombre.setText(selected.getNombre());
-			txtContrasenia.setText(selected.getContrasena());
-            cbxRol.setSelectedItem(selected.getRol());
+			txtCodigo.setText(selected.getIdUsuario());
+			txtNombre.setText(selected.getUsuario());
+			txtContrasenia.setText(selected.getContrasenia());
+            cbxRol.setSelectedItem(selected.getIdRol());
 
 		}
 	}
