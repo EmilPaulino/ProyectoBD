@@ -13,34 +13,14 @@ public class Paciente extends Persona {
 	protected HistoriaClinica miHistorial;
 	protected float estatura;
 	protected float peso;
-	protected ArrayList<Vacuna>misVacunas;
-	protected ArrayList<Enfermedad>misEnfermedades;
+
 	
 	public Paciente(String idPersona, String cedula, String nombre, String apellido, String telefono, String direccion,
-			Date fechaNacimiento, int edad, String sexo, float estatura, float peso) {
-		super(idPersona, cedula, nombre, apellido, telefono, direccion, fechaNacimiento, edad, sexo);
+			Date fechaNacimiento, String sexo, float estatura, float peso) {
+		super(idPersona, cedula, nombre, apellido, telefono, direccion, fechaNacimiento, sexo);
 		this.miHistorial = new HistoriaClinica();
 		this.estatura = estatura;
 		this.peso = peso;
-		misVacunas = new ArrayList<>();
-		misEnfermedades = new ArrayList<>();
-		
-	}
-
-	public ArrayList<Enfermedad> getMisEnfermedades() {
-		return misEnfermedades;
-	}
-
-	public void setMisEnfermedades(ArrayList<Enfermedad> misEnfermedades) {
-		this.misEnfermedades = misEnfermedades;
-	}
-
-	public ArrayList<Vacuna> getMisVacunas() {
-		return misVacunas;
-	}
-
-	public void setMisVacunas(ArrayList<Vacuna> misVacunas) {
-		this.misVacunas = misVacunas;
 	}
 
 	public HistoriaClinica getMiHistorial() {

@@ -459,7 +459,7 @@ public class ClinicaMedica implements Serializable {
 	    return false; 
 	}
 
-	public int getCantPacientesPoseenEnfermedad(Enfermedad enfermedad) {
+	/*public int getCantPacientesPoseenEnfermedad(Enfermedad enfermedad) {
 		int cant = 0;
 		for(Paciente paciente:losPacientes) {
 			if(paciente.getMisEnfermedades().contains(enfermedad)) {
@@ -467,7 +467,7 @@ public class ClinicaMedica implements Serializable {
 			}
 		}
 		return cant;
-	}
+	}*/
 
 	public boolean confirmarLogin(String usuario, String contrasena) {
 		boolean login = false;
@@ -499,7 +499,7 @@ public class ClinicaMedica implements Serializable {
 	    return enfermedad;
 	}
 
-	public Enfermedad buscarEnfermedadPacienteByCodigo(Paciente paciente, String codigo) {
+	/*public Enfermedad buscarEnfermedadPacienteByCodigo(Paciente paciente, String codigo) {
 		ArrayList<Enfermedad> enfermedades = paciente.getMisEnfermedades();
 		Enfermedad enfermedad = null;
 		boolean encontrado = false;
@@ -512,7 +512,7 @@ public class ClinicaMedica implements Serializable {
 	        i++; 
 	    }
 	    return enfermedad;
-	}
+	}*/
 
 	public void updateUsuario(Usuario selected) {
 		int index = buscarUsuarioByID(selected.getCodigo());

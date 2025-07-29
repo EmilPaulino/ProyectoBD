@@ -9,22 +9,22 @@ public class Medico extends Persona {
 	 */
 	private static final long serialVersionUID = 1L;
 	
-	protected String especialidad;
+	protected int idEspecialidad;
 	protected int exequatur;
 	
 	public Medico(String idPersona, String cedula, String nombre, String apellido, String telefono, String direccion,
-			Date fechaNacimiento, int edad, String sexo, String especialidad, int exequatur) {
-		super(idPersona, cedula, nombre, apellido, telefono, direccion, fechaNacimiento, edad, sexo);
-		this.especialidad = especialidad;
+			Date fechaNacimiento, int edad, String sexo, int idEspecialidad, int exequatur) {
+		super(idPersona, cedula, nombre, apellido, telefono, direccion, fechaNacimiento, sexo);
+		this.idEspecialidad = idEspecialidad;
 		this.exequatur = exequatur;
 	}
 
-	public String getEspecialidad() {
-		return especialidad;
+	public int getEspecialidad() {
+		return idEspecialidad;
 	}
 
-	public void setEspecialidad(String especialidad) {
-		this.especialidad = especialidad;
+	public void setEspecialidad(int idEspecialidad) {
+		this.idEspecialidad = idEspecialidad;
 	}
 
 	public int getExequatur() {
