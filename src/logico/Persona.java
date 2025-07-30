@@ -3,7 +3,7 @@ package logico;
 import java.io.Serializable;
 import java.util.Date;
 
-public abstract class Persona implements Serializable {
+public class Persona implements Serializable {
 
 	/**
 	 * 

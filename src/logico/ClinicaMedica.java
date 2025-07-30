@@ -14,12 +14,12 @@ import conexionsql.Conexion;
 import visual.usuario.Personal;
 
 public class ClinicaMedica implements Serializable {
-	
+
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	
+
 	private ArrayList<Paciente> losPacientes;
 	private ArrayList<Medico> losMedicos;
 	private ArrayList<Consulta> lasConsultas;
@@ -28,40 +28,40 @@ public class ClinicaMedica implements Serializable {
 	private ArrayList<Cita> lasCitas;
 	private ArrayList<Usuario>losUsuarios;
 
-	
+
 	public ArrayList<Usuario> getLosUsuarios() {
-	    ArrayList<Usuario> usuarios = new ArrayList<>();
+		ArrayList<Usuario> usuarios = new ArrayList<>();
 
-	    try {
-	        Conexion conexion = new Conexion();
-	        Connection conn = conexion.getConexion();
+		try {
+			Conexion conexion = new Conexion();
+			Connection conn = conexion.getConexion();
 
-	        String query = "SELECT u.idUsuario, u.usuario, u.contrasenia, u.idRol, r.descripcion, u.idPersona " +
-	                "FROM Usuario u " +
-	                "JOIN Rol r ON u.idRol = r.idRol";
+			String query = "SELECT u.idUsuario, u.usuario, u.contrasenia, u.idRol, r.descripcion, u.idPersona " +
+					"FROM Usuario u " +
+					"JOIN Rol r ON u.idRol = r.idRol";
 
-	        PreparedStatement ps = conn.prepareStatement(query);
-	        ResultSet rs = ps.executeQuery();
+			PreparedStatement ps = conn.prepareStatement(query);
+			ResultSet rs = ps.executeQuery();
 
-	        while (rs.next()) {
-	            String idUsuario = rs.getString("idUsuario");
-	            String usuario = rs.getString("usuario");
-	            String contrasenia = rs.getString("contrasenia");
-	            int idRol = rs.getInt("idRol");
-	            String idPersona = rs.getString("idPersona");
+			while (rs.next()) {
+				String idUsuario = rs.getString("idUsuario");
+				String usuario = rs.getString("usuario");
+				String contrasenia = rs.getString("contrasenia");
+				int idRol = rs.getInt("idRol");
+				String idPersona = rs.getString("idPersona");
 
-	            Usuario u = new Usuario(idUsuario, usuario, contrasenia, idRol, idPersona);
-	            usuarios.add(u);
-	        }
+				Usuario u = new Usuario(idUsuario, usuario, contrasenia, idRol, idPersona);
+				usuarios.add(u);
+			}
 
-	        rs.close();
-	        ps.close();
-	        conexion.cerrarConexion();
-	    } catch (SQLException e) {
-	        e.printStackTrace();
-	    }
+			rs.close();
+			ps.close();
+			conexion.cerrarConexion();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 
-	    return usuarios;
+		return usuarios;
 	}
 
 	public void setLosUsuarios(ArrayList<Usuario> losUsuarios) {
@@ -77,7 +77,7 @@ public class ClinicaMedica implements Serializable {
 	public static int codUsuario;
 	private static Usuario loginUsuario;
 	private static ClinicaMedica clinicaMedica = null;
-	
+
 	public ClinicaMedica() {
 		super();
 		losPacientes = new ArrayList<>();
@@ -95,7 +95,7 @@ public class ClinicaMedica implements Serializable {
 		codConsulta = 1;
 		codUsuario = 1;
 	}
-	
+
 	public static Usuario getLoginUsuario() {
 		return loginUsuario;
 	}
@@ -110,7 +110,7 @@ public class ClinicaMedica implements Serializable {
 		}
 		return clinicaMedica;
 	}
-	
+
 	public static int getCodVacuna() {
 		return codVacuna;
 	}
@@ -173,7 +173,7 @@ public class ClinicaMedica implements Serializable {
 	public void setLasConsultas(ArrayList<Consulta> lasConsultas) {
 		this.lasConsultas = lasConsultas;
 	}
-	
+
 	public ArrayList<Paciente> getLosPacientes() {
 		return losPacientes;
 	}
@@ -197,7 +197,7 @@ public class ClinicaMedica implements Serializable {
 	public void setLasEnfermedades(ArrayList<Enfermedad> lasEnfermedades) {
 		this.lasEnfermedades = lasEnfermedades;
 	}
-	
+
 	public ArrayList<Cita> getLasCitas() {
 		return lasCitas;
 	}
@@ -218,17 +218,17 @@ public class ClinicaMedica implements Serializable {
 		losPacientes.add(paciente);
 		codPaciente++;
 	}
-	
+
 	public void insertarMedico(Medico medico) {
 		losMedicos.add(medico);
 		codMedico++;
 	}
-	
+
 	public void insertarEnfermedad(Enfermedad enfermedad) {
 		lasEnfermedades.add(enfermedad);
 		codEnfermedad++;
 	}
-	
+
 	public void insertarVacuna (Vacuna vacuna) {
 		lasVacunas.add(vacuna);
 		codVacuna++;
@@ -265,7 +265,7 @@ public class ClinicaMedica implements Serializable {
 		lasConsultas.add(consulta);
 		codConsulta++;
 	}
-	
+
 	public void insertarConsultaEnHistorial(Consulta consulta, Paciente paciente) {
 		paciente.getMiHistorial().getLasConsultas().add(consulta);
 	}
@@ -283,7 +283,7 @@ public class ClinicaMedica implements Serializable {
 		}
 		return consulta;
 	}
-	
+
 	public Enfermedad buscarEnfermedadByCodigo(String codigo) {
 		Enfermedad enfermedad = null;
 		boolean encontrado = false;
@@ -296,29 +296,29 @@ public class ClinicaMedica implements Serializable {
 			i++;
 		}
 		return enfermedad;
-    }
-	
-	public void actualizarEnfermedad(Enfermedad enfermedadActualizada) {
-	    for (int i = 0; i < lasEnfermedades.size(); i++) {
-	        Enfermedad enfermedad = lasEnfermedades.get(i);
-	        if (enfermedad.getIdEnfermedad().equals(enfermedadActualizada.getIdEnfermedad())) {
-	            lasEnfermedades.set(i, enfermedadActualizada);
-	            return;
-	        }
-	    }
-	    System.out.println("Enfermedad no encontrada para actualizar.");
 	}
-	
+
+	public void actualizarEnfermedad(Enfermedad enfermedadActualizada) {
+		for (int i = 0; i < lasEnfermedades.size(); i++) {
+			Enfermedad enfermedad = lasEnfermedades.get(i);
+			if (enfermedad.getIdEnfermedad().equals(enfermedadActualizada.getIdEnfermedad())) {
+				lasEnfermedades.set(i, enfermedadActualizada);
+				return;
+			}
+		}
+		System.out.println("Enfermedad no encontrada para actualizar.");
+	}
+
 	public void actualizarPaciente(Paciente pacienteActualizado) {
-        for (int i = 0; i < losPacientes.size(); i++) {
-            Paciente paciente = losPacientes.get(i);
-            if (paciente.getIdPersona().equals(pacienteActualizado.getIdPersona())) {
-                losPacientes.set(i, pacienteActualizado);
-                return; 
-            }
-        }
-        System.out.println("Paciente no encontrado para actualizar.");
-    }
+		for (int i = 0; i < losPacientes.size(); i++) {
+			Paciente paciente = losPacientes.get(i);
+			if (paciente.getIdPersona().equals(pacienteActualizado.getIdPersona())) {
+				losPacientes.set(i, pacienteActualizado);
+				return; 
+			}
+		}
+		System.out.println("Paciente no encontrado para actualizar.");
+	}
 
 	public Paciente buscarPacienteByCedula(String codigo) {
 		Paciente paciente = null;
@@ -333,7 +333,7 @@ public class ClinicaMedica implements Serializable {
 		}
 		return paciente;
 	}
-	
+
 	public int buscarPacienteByCedulaGetIndex(String cedula) {
 		int paciente = -1;
 		boolean encontrado = false;
@@ -349,14 +349,14 @@ public class ClinicaMedica implements Serializable {
 	}
 
 	public boolean cedulaPacienteExiste(String cedula) {
-        for (Paciente paciente : losPacientes) {
-            if (paciente.getCedula().equals(cedula)) {
-                return true; 
-            }
-        }
-        return false; 
-    }
-	
+		for (Paciente paciente : losPacientes) {
+			if (paciente.getCedula().equals(cedula)) {
+				return true; 
+			}
+		}
+		return false; 
+	}
+
 	public void updatePaciente(Paciente selected) {
 		int index = buscarPacienteByCedulaGetIndex(selected.getCedula());
 		if(index != 1) {
@@ -377,7 +377,7 @@ public class ClinicaMedica implements Serializable {
 		}
 		return medico;
 	}
-	
+
 	public int buscarMedicoByCedulaGetIndex(String cedula) {
 		int medico = -1;
 		boolean encontrado = false;
@@ -391,57 +391,57 @@ public class ClinicaMedica implements Serializable {
 		}
 		return medico;
 	}
-	
+
 	public boolean cedulaMedicoExiste(String cedula) {
-        for (Medico medico : losMedicos) {
-            if (medico.getCedula().equals(cedula)) {
-                return true; 
-            }
-        }
-        return false; 
-    }
-	
+		for (Medico medico : losMedicos) {
+			if (medico.getCedula().equals(cedula)) {
+				return true; 
+			}
+		}
+		return false; 
+	}
+
 	public void updateMedico(Medico selected) {
 		int index = buscarMedicoByCedulaGetIndex(selected.getCedula());
 		if(index != 1) {
 			losMedicos.set(index, selected);
 		}
 	}
-	
+
 	public Cita buscarCitaByIdCita(String idCita) {
-	    Cita cita = null;
-	    boolean encontrado = false;
-	    int i = 0;
-	    while (!encontrado && i < lasCitas.size()) { 
-	        if (lasCitas.get(i).getIdCita().equalsIgnoreCase(idCita)) { 
-	            cita = lasCitas.get(i); 
-	            encontrado = true; 
-	        }
-	        i++; 
-	    }
-	    return cita; 
+		Cita cita = null;
+		boolean encontrado = false;
+		int i = 0;
+		while (!encontrado && i < lasCitas.size()) { 
+			if (lasCitas.get(i).getIdCita().equalsIgnoreCase(idCita)) { 
+				cita = lasCitas.get(i); 
+				encontrado = true; 
+			}
+			i++; 
+		}
+		return cita; 
 	}
 
 	public int buscarCitaByIdGetIndex(String idCita) {
-	    int index = -1;
-	    boolean encontrado = false;
-	    int i = 0;
-	    while (!encontrado && i < lasCitas.size()) {
-	        if (lasCitas.get(i).getIdCita().equalsIgnoreCase(idCita)) {
-	            index = i; 
-	            encontrado = true; 
-	        }
-	        i++;
-	    }
-	    return index; 
+		int index = -1;
+		boolean encontrado = false;
+		int i = 0;
+		while (!encontrado && i < lasCitas.size()) {
+			if (lasCitas.get(i).getIdCita().equalsIgnoreCase(idCita)) {
+				index = i; 
+				encontrado = true; 
+			}
+			i++;
+		}
+		return index; 
 	}
-	
+
 	public void eliminarCita(Cita cita) {
-	    if (lasCitas.contains(cita)) {
-	        lasCitas.remove(cita); 
-	    } 
+		if (lasCitas.contains(cita)) {
+			lasCitas.remove(cita); 
+		} 
 	}
-	
+
 	public void updateCita(Cita cita) {
 		int index = buscarCitaByIdGetIndex(cita.getIdCita());
 		if(index != -1) {
@@ -463,40 +463,40 @@ public class ClinicaMedica implements Serializable {
 
 	public Vacuna buscarVacunaByCodigo(String codigo) {
 		Vacuna vacuna = null;
-	    boolean encontrado = false;
-	    int i = 0;
-	    while (!encontrado && i < lasVacunas.size()) { 
-	        if (lasVacunas.get(i).getIdVacuna().equalsIgnoreCase(codigo)) { 
-	        	vacuna = lasVacunas.get(i); 
-	            encontrado = true; 
-	        }
-	        i++; 
-	    }
-	    return vacuna; 
+		boolean encontrado = false;
+		int i = 0;
+		while (!encontrado && i < lasVacunas.size()) { 
+			if (lasVacunas.get(i).getIdVacuna().equalsIgnoreCase(codigo)) { 
+				vacuna = lasVacunas.get(i); 
+				encontrado = true; 
+			}
+			i++; 
+		}
+		return vacuna; 
 	}
-	
+
 	public ArrayList<Vacuna> getVacunasGenerales() {
-        return lasVacunas;
-    }
-	
-	public boolean updateVacuna(String idVacuna, Vacuna nuevaVacuna) {
-	    for (int i = 0; i < lasVacunas.size(); i++) {
-	        if (lasVacunas.get(i).getIdVacuna().equalsIgnoreCase(idVacuna)) {
-	            lasVacunas.set(i, nuevaVacuna);
-	            return true; 
-	        }
-	    }
-	    return false;
+		return lasVacunas;
 	}
-	
+
+	public boolean updateVacuna(String idVacuna, Vacuna nuevaVacuna) {
+		for (int i = 0; i < lasVacunas.size(); i++) {
+			if (lasVacunas.get(i).getIdVacuna().equalsIgnoreCase(idVacuna)) {
+				lasVacunas.set(i, nuevaVacuna);
+				return true; 
+			}
+		}
+		return false;
+	}
+
 	public boolean eliminarVacuna(String idVacuna) {
-	    for (int i = 0; i < lasVacunas.size(); i++) {
-	        if (lasVacunas.get(i).getIdVacuna().equalsIgnoreCase(idVacuna)) {
-	            lasVacunas.remove(i);
-	            return true;
-	        }
-	    }
-	    return false; 
+		for (int i = 0; i < lasVacunas.size(); i++) {
+			if (lasVacunas.get(i).getIdVacuna().equalsIgnoreCase(idVacuna)) {
+				lasVacunas.remove(i);
+				return true;
+			}
+		}
+		return false; 
 	}
 
 	/*public int getCantPacientesPoseenEnfermedad(Enfermedad enfermedad) {
@@ -544,22 +544,58 @@ public class ClinicaMedica implements Serializable {
 	}
 
 	public void regUser(Usuario aux) {
-		losUsuarios.add(aux);
-		codUsuario++;		
+	    Connection conn = null;
+	    PreparedStatement psInsert = null;
+	    PreparedStatement psUpdateCod = null;
+	    try {
+	        conn = new Conexion().getConexion();
+	        conn.setAutoCommit(false); //Para hacer una transacción
+
+	        String sqlInsert = "INSERT INTO Usuario (idUsuario, usuario, contrasenia, idRol, idPersona) VALUES (?, ?, ?, ?, ?)";
+	        psInsert = conn.prepareStatement(sqlInsert);
+	        psInsert.setString(1, aux.getIdUsuario());
+	        psInsert.setString(2, aux.getUsuario());
+	        psInsert.setString(3, aux.getContrasenia());
+	        psInsert.setInt(4, aux.getIdRol());
+	        psInsert.setString(5, aux.getIdPersona());
+
+	        int rows = psInsert.executeUpdate();
+
+	        if(rows > 0) {
+	            conn.commit(); //Confirma
+	        } else {
+	            conn.rollback(); //No lo hagas
+	        }
+	    } catch (SQLException ex) {
+	        ex.printStackTrace();
+	        try {
+	            if(conn != null) conn.rollback();
+	        } catch (SQLException e) {
+	            e.printStackTrace();
+	        }
+	    } finally {
+	        try {
+	            if(psInsert != null) psInsert.close();
+	            if(psUpdateCod != null) psUpdateCod.close();
+	            if(conn != null) conn.close();
+	        } catch (SQLException e) {
+	            e.printStackTrace();
+	        }
+	    }
 	}
 
 	public Enfermedad buscarEnfermedadById(String codigo) {
 		Enfermedad enfermedad = null;
 		boolean encontrado = false;
-	    int i = 0;
-	    while (!encontrado && i < lasEnfermedades.size()) { 
-	        if (lasEnfermedades.get(i).getIdEnfermedad().equalsIgnoreCase(codigo)) { 
-	        	enfermedad = lasEnfermedades.get(i); 
-	            encontrado = true; 
-	        }
-	        i++; 
-	    }
-	    return enfermedad;
+		int i = 0;
+		while (!encontrado && i < lasEnfermedades.size()) { 
+			if (lasEnfermedades.get(i).getIdEnfermedad().equalsIgnoreCase(codigo)) { 
+				enfermedad = lasEnfermedades.get(i); 
+				encontrado = true; 
+			}
+			i++; 
+		}
+		return enfermedad;
 	}
 
 	/*public Enfermedad buscarEnfermedadPacienteByCodigo(Paciente paciente, String codigo) {
@@ -578,11 +614,27 @@ public class ClinicaMedica implements Serializable {
 	}*/
 
 	public void updateUsuario(Usuario selected) {
-		int index = buscarUsuarioByID(selected.getCodigo());
-		if(index != 1) {
-			losUsuarios.set(index, selected);
-		}
-		
+		 String sql = "UPDATE Usuario SET contrasenia = ?, idRol = ? WHERE idUsuario = ?";
+
+		    try (Connection conn = new Conexion().getConexion();
+		         PreparedStatement ps = conn.prepareStatement(sql)) {
+
+		        ps.setString(1, selected.getContrasenia());
+		        ps.setInt(2, selected.getIdRol());
+		        ps.setString(3, selected.getIdUsuario());
+
+		        int rows = ps.executeUpdate();
+
+		        if (rows > 0) {
+		            System.out.println("Usuario actualizado correctamente en la base de datos.");
+		        } else {
+		            System.out.println("No se encontró el usuario para actualizar.");
+		        }
+
+		    } catch (SQLException e) {
+		        e.printStackTrace();
+		    }
+
 	}
 
 	private int buscarUsuarioByID(String codigo) {
@@ -599,87 +651,87 @@ public class ClinicaMedica implements Serializable {
 		return usuario;
 	}
 
-	
+
 	public Usuario buscarUsuarioByCodigo(String codigo) {
 		Usuario usuario = null;
-	    String sql = "SELECT u.idUsuario, u.usuario, u.contrasenia, u.idRol, u.idPersona " +
-	                 "FROM Usuario u WHERE u.idUsuario = ?";
-	    try (Connection conn = new Conexion().getConexion();
-	         PreparedStatement ps = conn.prepareStatement(sql)) {
-	         
-	        ps.setString(1, codigo);
-	        try (ResultSet rs = ps.executeQuery()) {
-	            if (rs.next()) {
-	                String idUsuario = rs.getString("idUsuario");
-	                String usuarioStr = rs.getString("usuario");
-	                String contrasenia = rs.getString("contrasenia");
-	                int idRol = rs.getInt("idRol");
-	                String idPersona = rs.getString("idPersona");
+		String sql = "SELECT u.idUsuario, u.usuario, u.contrasenia, u.idRol, u.idPersona " +
+				"FROM Usuario u WHERE u.idUsuario = ?";
+		try (Connection conn = new Conexion().getConexion();
+				PreparedStatement ps = conn.prepareStatement(sql)) {
 
-	                usuario = new Usuario(idUsuario, usuarioStr, contrasenia, idRol, idPersona);
-	            }
-	        }
-	    } catch (SQLException e) {
-	        e.printStackTrace();
-	    }
-	    return usuario;
+			ps.setString(1, codigo);
+			try (ResultSet rs = ps.executeQuery()) {
+				if (rs.next()) {
+					String idUsuario = rs.getString("idUsuario");
+					String usuarioStr = rs.getString("usuario");
+					String contrasenia = rs.getString("contrasenia");
+					int idRol = rs.getInt("idRol");
+					String idPersona = rs.getString("idPersona");
+
+					usuario = new Usuario(idUsuario, usuarioStr, contrasenia, idRol, idPersona);
+				}
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return usuario;
 	}
 
 	public Map<Integer, String> cargarRoles() {
-	    Map<Integer, String> roles = new HashMap<>();
-	    String sql = "SELECT idRol, descripcion FROM Rol";
+		Map<Integer, String> roles = new HashMap<>();
+		String sql = "SELECT idRol, descripcion FROM Rol";
 
-	    try (Connection conn = new Conexion().getConexion();
-	         PreparedStatement ps = conn.prepareStatement(sql);
-	         ResultSet rs = ps.executeQuery()) {
+		try (Connection conn = new Conexion().getConexion();
+				PreparedStatement ps = conn.prepareStatement(sql);
+				ResultSet rs = ps.executeQuery()) {
 
-	        while (rs.next()) {
-	            roles.put(rs.getInt("idRol"), rs.getString("descripcion"));
-	        }
+			while (rs.next()) {
+				roles.put(rs.getInt("idRol"), rs.getString("descripcion"));
+			}
 
-	    } catch (SQLException e) {
-	        e.printStackTrace();
-	    }
-	    return roles;
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return roles;
 	}
 
 	public Medico buscarMedicoByIdPersona(String idPersona) {
-	    Medico medico = null;
-	    String sql = "SELECT m.idPersona, m.exequatur, m.idEspecialidad, " +
-	                 "p.nombre, p.apellido, p.cedula, p.telefono, p.direccion, "
-	                 + "p.fechaNacimiento, p.sexo" +
-	                 "FROM Medico m " +
-	                 "JOIN Persona p ON m.idPersona = p.idPersona " +
-	                 "WHERE m.idPersona = ?";
+		Medico medico = null;
+		String sql = "SELECT m.idPersona, m.exequatur, m.idEspecialidad, " +
+				"p.nombre, p.apellido, p.cedula, p.telefono, p.direccion, "
+				+ "p.fechaNacimiento, p.sexo" +
+				"FROM Medico m " +
+				"JOIN Persona p ON m.idPersona = p.idPersona " +
+				"WHERE m.idPersona = ?";
 
-	    try (Connection conn = new Conexion().getConexion();
-	         PreparedStatement ps = conn.prepareStatement(sql)) {
+		try (Connection conn = new Conexion().getConexion();
+				PreparedStatement ps = conn.prepareStatement(sql)) {
 
-	        ps.setString(1, idPersona);
+			ps.setString(1, idPersona);
 
-	        try (ResultSet rs = ps.executeQuery()) {
-	            if (rs.next()) {
-	                String id = rs.getString("idPersona");
-	                String cedula = rs.getString("cedula");
-	                String nombre = rs.getString("nombre");
-	                String apellido = rs.getString("apellido");
-	                String telefono = rs.getString("telefono");
-	                String direccion = rs.getString("direccion");
-	                Date fechaNacimiento = rs.getDate("fechaNacimiento");
-	                char sexo = rs.getString("sexo").charAt(0);
-	                int idEspecialidad = rs.getInt("idEspecialidad");
-	                int exequatur = rs.getInt("exequatur");
+			try (ResultSet rs = ps.executeQuery()) {
+				if (rs.next()) {
+					String id = rs.getString("idPersona");
+					String cedula = rs.getString("cedula");
+					String nombre = rs.getString("nombre");
+					String apellido = rs.getString("apellido");
+					String telefono = rs.getString("telefono");
+					String direccion = rs.getString("direccion");
+					Date fechaNacimiento = rs.getDate("fechaNacimiento");
+					char sexo = rs.getString("sexo").charAt(0);
+					int idEspecialidad = rs.getInt("idEspecialidad");
+					int exequatur = rs.getInt("exequatur");
 
-	                medico = new Medico(id, cedula, nombre, apellido, telefono, direccion, fechaNacimiento,
-	                		sexo, idEspecialidad, exequatur);
-	            }
-	        }
+					medico = new Medico(id, cedula, nombre, apellido, telefono, direccion, fechaNacimiento,
+							sexo, idEspecialidad, exequatur);
+				}
+			}
 
-	    } catch (SQLException e) {
-	        e.printStackTrace();
-	    }
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 
-	    return medico;
+		return medico;
 	}
 
 	public Personal buscarPersonalbyIdPersona(String idPersona) {
@@ -687,6 +739,139 @@ public class ClinicaMedica implements Serializable {
 		return null;
 	}
 
+	public ArrayList<Rol> obtenerRoles() {
+		ArrayList<Rol> roles = new ArrayList<>();
+	    String sql = "SELECT idRol, descripcion FROM Rol";
 
+	    try (Connection conn = new Conexion().getConexion();
+	         PreparedStatement ps = conn.prepareStatement(sql);
+	         ResultSet rs = ps.executeQuery()) {
+
+	        while (rs.next()) {
+	            roles.add(new Rol(rs.getInt("idRol"), rs.getString("descripcion")));
+	        }
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	    }
+	    return roles;
+	}
+
+	public Persona buscarPersonabyCodigo(String codigo) {
+		Persona persona = null;
+		String sql = "SELECT idPersona, nombre, apellido, cedula, telefono, direccion, fechaNacimiento, sexo FROM Persona WHERE idPersona = ?";
+
+		try (Connection conn = new Conexion().getConexion();
+				PreparedStatement ps = conn.prepareStatement(sql)) {
+
+			ps.setString(1, codigo);
+			ResultSet rs = ps.executeQuery();
+
+			if (rs.next()) {
+				persona = new Persona(
+						rs.getString("idPersona"),
+						rs.getString("cedula"),
+						rs.getString("nombre"),
+						rs.getString("apellido"),
+						rs.getString("telefono"),
+						rs.getString("direccion"),
+						rs.getDate("fechaNacimiento"),
+						rs.getString("sexo").charAt(0)
+
+						);
+			}
+			rs.close();
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+
+		return persona;
+	}
+
+	public ArrayList<Persona> getPersonasSinUsuario() {
+		ArrayList<Persona> lista = new ArrayList<>();
+		String sql = "SELECT p.idPersona, p.nombre, p.apellido, p.cedula, p.telefono, p.direccion, "
+				+ "p.fechaNacimiento, p.sexo "
+				+ "FROM Persona p "
+				+ "LEFT JOIN Usuario u ON p.idPersona = u.idPersona "
+				+ "WHERE u.idPersona IS NULL";
+
+		try (Connection conn = new Conexion().getConexion();
+				PreparedStatement ps = conn.prepareStatement(sql);
+				ResultSet rs = ps.executeQuery()) {
+
+			while (rs.next()) {
+				Persona persona = new Persona(
+						rs.getString("idPersona"),
+						rs.getString("cedula"),
+						rs.getString("nombre"),
+						rs.getString("apellido"),
+						rs.getString("telefono"),
+						rs.getString("direccion"),
+						rs.getDate("fechaNacimiento"),
+						rs.getString("sexo").charAt(0)
+						);
+				lista.add(persona);
+			}
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+
+		return lista;
+	}
+
+	public static String generarNuevoCodigoUsuario() {
+		String nuevoCodigo = "U-1"; // Valor por defecto
+		try {
+			Connection conn = new Conexion().getConexion();
+			String sql = "SELECT MAX(CAST(SUBSTRING(idUsuario, 3, LEN(idUsuario)) AS INT)) FROM Usuario";
+			PreparedStatement ps = conn.prepareStatement(sql);
+			ResultSet rs = ps.executeQuery();
+
+			if (rs.next()) {
+				int ultimoNumero = rs.getInt(1); // Ej: 5
+				nuevoCodigo = "U-" + (ultimoNumero + 1);
+			}
+
+			rs.close();
+			ps.close();
+			conn.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+
+		return nuevoCodigo;
+	}
+
+	public Persona buscarPersonabyIdPersona(String idPersona) {
+		Persona persona = null;
+	    String sql = "SELECT * FROM Persona WHERE idPersona = ?";
+
+	    try (Connection conn = new Conexion().getConexion();
+	         PreparedStatement ps = conn.prepareStatement(sql)) {
+
+	        ps.setString(1, idPersona);
+	        ResultSet rs = ps.executeQuery();
+
+	        if (rs.next()) {
+	            String cedula = rs.getString("cedula");
+	            String nombre = rs.getString("nombre");
+	            String apellido = rs.getString("apellido");
+	            String telefono = rs.getString("telefono");
+	            String direccion = rs.getString("direccion");
+	            Date fechaNacimiento = rs.getDate("fechaNacimiento");
+	            char sexo = rs.getString("sexo").charAt(0);
+
+	            // Construyes la persona según tu clase Persona
+	            persona = new Persona(idPersona, cedula, nombre, apellido, telefono, direccion, fechaNacimiento, sexo);
+	        }
+
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	    }
+
+	    return persona;
+	}
 
 }
