@@ -78,7 +78,7 @@ public class SeleccionarPersona extends JDialog {
 		});
 		scrollPane.setViewportView(table);
 		modelo = new DefaultTableModel();
-		String[] identificadores = {"Código", "Cédula", "Nombre"};
+		String[] identificadores = {"Cï¿½digo", "Cï¿½dula", "Nombre"};
 		modelo.setColumnIdentifiers(identificadores);
 		table.setModel(modelo);
 		{
