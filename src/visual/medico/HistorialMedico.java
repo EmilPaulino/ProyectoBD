@@ -15,6 +15,7 @@ import javax.swing.table.DefaultTableModel;
 import logico.ClinicaMedica;
 import logico.Consulta;
 import logico.Paciente;
+import logico.Persona;
 import visual.consulta.RegistroConsulta;
 
 import java.awt.event.ActionListener;
@@ -75,7 +76,7 @@ public class HistorialMedico extends JDialog {
 							if(index >= 0) {
 								btnDetalle.setEnabled(true);
 								String codigo = table.getValueAt(index, 0).toString();
-								sel = ClinicaMedica.getInstance().buscarConsultaById(codigo);
+								sel = ClinicaMedica.getInstance().getConsultaById(codigo);
 							}
 						}
 					});
@@ -124,13 +125,14 @@ public class HistorialMedico extends JDialog {
 	private void loadHistorial(){
 		if(selected!=null) {
 			modelo.setRowCount(0);
-			//ArrayList<Consulta> consultas = selected.getMiHistorial().getLasConsultas();
+			ArrayList<Consulta> consultas = ClinicaMedica.getInstance().getConsultasImportantesByIdPersona(selected.getIdPersona());
 			row = new Object[table.getColumnCount()];
 			for(Consulta consulta:selected.getMiHistorial().getLasConsultas()) {
-				row[0] = consulta.getIdConsulta();
+				row[0] = consulta.getCodConsulta();
 				row[1] = consulta.getFecha();
 				row[2] = consulta.getDiagnostico();
-				row[3] = consulta.getMedico().getNombre()+" "+consulta.getMedico().getApellido();
+				Persona persona = ClinicaMedica.getInstance().buscarPersonabyCodigo(consulta.getIdPersona());
+				row[3] = persona.getNombre()+' '+persona.getApellido();
 				modelo.addRow(row);
 			}
 		}

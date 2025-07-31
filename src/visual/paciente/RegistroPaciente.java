@@ -38,7 +38,6 @@ public class RegistroPaciente extends JDialog {
 	private JTextField txtApellido;
 	private JTextField txtTelefono;
 	private JTextField txtDireccion;
-	private JTextField txtEdad;
 	private JComboBox cbxSexo;
 	private JSpinner spnEstatura;
 	private JSpinner spnPeso;
@@ -96,7 +95,7 @@ public class RegistroPaciente extends JDialog {
 				txtCodigo.setBounds(74, 19, 131, 20);
 				panel.add(txtCodigo);
 				txtCodigo.setColumns(10);
-				txtCodigo.setText("P-"+ClinicaMedica.getInstance().codPaciente);
+				txtCodigo.setText(ClinicaMedica.getInstance().generarNuevoCodigoPaciente());
 			}
 			{
 				JLabel lblNewLabel_1 = new JLabel("C\u00E9dula:");
@@ -184,60 +183,22 @@ public class RegistroPaciente extends JDialog {
 			}
 			{
 				spnFecha = new JSpinner();
-				spnFecha.addChangeListener(new ChangeListener() {
-					@Override
-					public void stateChanged(ChangeEvent e) {
-						// valor en el jspinner
-						Date fechaNacimiento = (Date) spnFecha.getValue();
-
-						// obtener fecha actual
-						Calendar fechaActual = Calendar.getInstance();
-
-						// calendario con la fecha de nacimiento
-						Calendar nacimiento = Calendar.getInstance();
-						nacimiento.setTime(fechaNacimiento);
-
-						// calcular edad
-						int edad = fechaActual.get(Calendar.YEAR) - nacimiento.get(Calendar.YEAR);
-
-						// ajustar si no ha cumplido anos
-						if (fechaActual.get(Calendar.DAY_OF_YEAR) < nacimiento.get(Calendar.DAY_OF_YEAR)) {
-						    edad--;
-						}
-
-						// actualizar el txtEdad
-						txtEdad.setText(String.valueOf(edad));
-					}
-				});
-				spnFecha.setModel(new SpinnerDateModel(new Date(1732161600000L), null, null, Calendar.MILLISECOND));
+				spnFecha.setModel(new SpinnerDateModel(new Date(), null, null, Calendar.MILLISECOND));
+				spnFecha.setEditor(new JSpinner.DateEditor(spnFecha, "dd/MM/yyyy"));
 				spnFecha.setBounds(126, 131, 122, 20);
 				panel.add(spnFecha);
 				
 			}
 			{
-				JLabel lblNewLabel_7 = new JLabel("Edad:");
-				lblNewLabel_7.setHorizontalAlignment(SwingConstants.RIGHT);
-				lblNewLabel_7.setBounds(258, 134, 35, 14);
-				panel.add(lblNewLabel_7);
-			}
-			{
-				txtEdad = new JTextField();
-				txtEdad.setEditable(false);
-				txtEdad.setBounds(303, 131, 56, 20);
-				panel.add(txtEdad);
-				txtEdad.setColumns(10);
-
-			}
-			{
 				JLabel lblNewLabel_8 = new JLabel("Sexo:");
 				lblNewLabel_8.setHorizontalAlignment(SwingConstants.RIGHT);
-				lblNewLabel_8.setBounds(369, 134, 40, 14);
+				lblNewLabel_8.setBounds(297, 134, 40, 14);
 				panel.add(lblNewLabel_8);
 			}
 			{
 				cbxSexo = new JComboBox();
 				cbxSexo.setModel(new DefaultComboBoxModel(new String[] {"<Seleccione>", "Masculino", "Femenino"}));
-				cbxSexo.setBounds(419, 131, 105, 20);
+				cbxSexo.setBounds(349, 131, 175, 20);
 				panel.add(cbxSexo);
 			}
 			{
@@ -286,6 +247,17 @@ public class RegistroPaciente extends JDialog {
 				        }
 						
 						if(selected == null) {
+							String sexoStr = (String) cbxSexo.getSelectedItem();
+							char sexo;
+
+							if ("Masculino".equals(sexoStr)) {
+							    sexo = 'M';
+							} else if ("Femenino".equals(sexoStr)) {
+							    sexo = 'F';
+							} else {
+							    sexo = ' ';
+							}
+							
 							Paciente paciente = new Paciente(
 								    txtCodigo.getText(),
 								    txtCedula.getText(),
@@ -294,8 +266,7 @@ public class RegistroPaciente extends JDialog {
 								    txtTelefono.getText(),
 								    txtDireccion.getText(),
 								    (Date) spnFecha.getValue(),
-								    Integer.parseInt(txtEdad.getText()),
-								    (String) cbxSexo.getSelectedItem(),
+								    sexo,
 								    Float.parseFloat(spnEstatura.getValue().toString()),
 								    Float.parseFloat(spnPeso.getValue().toString())
 								    
@@ -316,14 +287,28 @@ public class RegistroPaciente extends JDialog {
 							selected.setApellido(txtApellido.getText());
 							selected.setTelefono(txtTelefono.getText());
 							selected.setDireccion(txtDireccion.getText());
-							selected.setEdad(Integer.parseInt(txtEdad.getText()));
-							selected.setSexo((String) cbxSexo.getSelectedItem());
+							String sexoStr = (String) cbxSexo.getSelectedItem();
+							char sexo;
+
+							if ("Masculino".equals(sexoStr)) {
+							    sexo = 'M';
+							} else if ("Femenino".equals(sexoStr)) {
+							    sexo = 'F';
+							} else {
+							    sexo = ' ';
+							}
+							selected.setSexo(sexo);
 							selected.setEstatura(Float.parseFloat(spnEstatura.getValue().toString()));
 							selected.setPeso(Float.parseFloat(spnPeso.getValue().toString()));
 							selected.setFechaNacimiento((Date) spnFecha.getValue());
-							ClinicaMedica.getInstance().updatePaciente(selected);
+							int Result = ClinicaMedica.getInstance().updatePaciente(selected);
+							if(Result != 0) {
+								JOptionPane.showMessageDialog(null,"Operacion exitosa","Informacion",JOptionPane.INFORMATION_MESSAGE);
+							} else {
+								JOptionPane.showMessageDialog(null,"Error, no se pudo actualizar","Error",JOptionPane.ERROR_MESSAGE);
+
+							}
 							ListadoPacientes.loadPacientes();
-							JOptionPane.showMessageDialog(null,"Operacion exitosa","Informacion",JOptionPane.INFORMATION_MESSAGE);
 							dispose();
 						}						
 					}					
@@ -347,28 +332,46 @@ public class RegistroPaciente extends JDialog {
 		loadPaciente();
 	}
 	private void loadPaciente() {
-		if (selected != null) {
-            txtCodigo.setText(selected.getIdPersona());
-            txtCedula.setText(selected.getCedula());
-            txtNombre.setText(selected.getNombre());
-            txtApellido.setText(selected.getApellido());
-            txtTelefono.setText(selected.getTelefono());
-            txtDireccion.setText(selected.getDireccion());
-            txtEdad.setText(String.valueOf(selected.getEdad()));
-            cbxSexo.setSelectedItem(selected.getSexo());
-            spnEstatura.setValue(selected.getEstatura());
-            spnPeso.setValue(selected.getPeso());
-            spnFecha.setValue(selected.getFechaNacimiento());
-        }
+	    if (selected != null) {
+	        txtCodigo.setText(selected.getIdPersona());
+	        txtCedula.setText(selected.getCedula());
+	        txtNombre.setText(selected.getNombre());
+	        txtApellido.setText(selected.getApellido());
+	        txtTelefono.setText(selected.getTelefono());
+	        txtDireccion.setText(selected.getDireccion());
+
+	        char sexo = selected.getSexo();
+	        String sexoTexto;
+	        if (sexo == 'M') {
+	            sexoTexto = "Masculino";
+	        } else if (sexo == 'F') {
+	            sexoTexto = "Femenino";
+	        } else {
+	            sexoTexto = "<Seleccione>";
+	        }
+	        cbxSexo.setSelectedItem(sexoTexto);
+
+	        spnEstatura.setValue(selected.getEstatura());
+	        spnPeso.setValue(selected.getPeso());
+	        spnFecha.setValue(selected.getFechaNacimiento());
+	        
+	        txtCedula.setEditable(false);
+	        txtNombre.setEditable(false);
+	        txtApellido.setEditable(false);
+	        spnFecha.setEnabled(false);
+	        cbxSexo.setEnabled(false);
+	        spnEstatura.setEnabled(false);
+	        spnPeso.setEnabled(false);
+	        
+	    }
 	}
 	private void clean() {
-		txtCodigo.setText("P-"+ClinicaMedica.getInstance().codPaciente);
+		txtCodigo.setText(ClinicaMedica.getInstance().generarNuevoCodigoPaciente());
 		txtCedula.setText("");
 		txtNombre.setText("");
 		txtApellido.setText("");
 		txtTelefono.setText("");
 		txtDireccion.setText("");
-		txtEdad.setText("");
 		cbxSexo.setSelectedIndex(0);
 		spnEstatura.setValue(0);
 		spnPeso.setValue(0);
@@ -386,7 +389,7 @@ public class RegistroPaciente extends JDialog {
 	        estanVacios = true;
 	    }
 
-	    if (cbxSexo.getSelectedIndex() == 0) { // "<Seleccione>" es el índice 0
+	    if (cbxSexo.getSelectedIndex() == 0) { 
 	        estanVacios = true;
 	    }
 

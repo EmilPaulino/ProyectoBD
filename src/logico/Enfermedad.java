@@ -9,12 +9,12 @@ public class Enfermedad implements Serializable {
 	 */
 	private static final long serialVersionUID = 1L;
 	
-	private int idEnfermedad;
+	private String idEnfermedad;
 	private String nombre;
 	private String sintomas;
 	private int idTipoEnfermedad;
 	
-	public Enfermedad(int idEnfermedad, String nombre, String sintomas, int idTipoEnfermedad) {
+	public Enfermedad(String idEnfermedad, String nombre, String sintomas, int idTipoEnfermedad) {
 		super();
 		this.idEnfermedad = idEnfermedad;
 		this.nombre = nombre;
@@ -22,11 +22,11 @@ public class Enfermedad implements Serializable {
 		this.idTipoEnfermedad = idTipoEnfermedad;
 	}
 
-	public int getIdEnfermedad() {
+	public String getIdEnfermedad() {
 		return idEnfermedad;
 	}
 
-	public void setIdEnfermedad(int idEnfermedad) {
+	public void setIdEnfermedad(String idEnfermedad) {
 		this.idEnfermedad = idEnfermedad;
 	}
 

@@ -10,6 +10,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.swing.JOptionPane;
+
 import conexionsql.Conexion;
 import visual.usuario.Personal;
 
@@ -175,7 +177,52 @@ public class ClinicaMedica implements Serializable {
 	}
 
 	public ArrayList<Paciente> getLosPacientes() {
-		return losPacientes;
+		ArrayList<Paciente> pacientes = new ArrayList<>();
+		Connection con = null;
+		PreparedStatement stmt = null;
+		ResultSet rs = null;
+
+		try {
+			Conexion conexion = new Conexion();
+			con = conexion.getConexion();
+
+			String sql = "SELECT p.idPersona, p.cedula, p.nombre, p.apellido, p.telefono, p.direccion, "
+					+ "p.fechaNacimiento, p.sexo, pa.estatura, pa.peso "
+					+ "FROM Persona p "
+					+ "INNER JOIN Paciente pa ON p.idPersona = pa.idPersona";
+
+			stmt = con.prepareStatement(sql);
+			rs = stmt.executeQuery();
+
+			while (rs.next()) {
+				Paciente paciente = new Paciente(
+						rs.getString("idPersona"),
+						rs.getString("cedula"),
+						rs.getString("nombre"),
+						rs.getString("apellido"),
+						rs.getString("telefono"),
+						rs.getString("direccion"),
+						rs.getDate("fechaNacimiento"),
+						rs.getString("sexo").charAt(0),
+						rs.getFloat("estatura"),
+						rs.getFloat("peso")
+						);
+				pacientes.add(paciente);
+			}
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				if (rs != null) rs.close();
+				if (stmt != null) stmt.close();
+				if (con != null) con.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+
+		return pacientes;
 	}
 
 	public void setLosPacientes(ArrayList<Paciente> losPacientes) {
@@ -215,8 +262,50 @@ public class ClinicaMedica implements Serializable {
 	}
 
 	public void insertarPaciente(Paciente paciente) {
-		losPacientes.add(paciente);
-		codPaciente++;
+		Connection conn = null;
+		PreparedStatement psPersona = null;
+		PreparedStatement psPaciente = null;
+
+		try {
+			Conexion conexion = new Conexion();
+			conn = conexion.getConexion();
+
+			// 1. Insertar en Persona
+			String sqlPersona = "INSERT INTO Persona (idPersona, cedula, nombre, apellido, telefono, direccion, fechaNacimiento, sexo) "
+					+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+			psPersona = conn.prepareStatement(sqlPersona);
+			psPersona.setString(1, paciente.getIdPersona());
+			psPersona.setString(2, paciente.getCedula());
+			psPersona.setString(3, paciente.getNombre());
+			psPersona.setString(4, paciente.getApellido());
+			psPersona.setString(5, paciente.getTelefono());
+			psPersona.setString(6, paciente.getDireccion());
+			psPersona.setDate(7, new java.sql.Date(paciente.getFechaNacimiento().getTime()));
+			psPersona.setString(8, String.valueOf(paciente.getSexo()));
+
+			psPersona.executeUpdate();
+
+			// 2. Insertar en Paciente
+			String sqlPaciente = "INSERT INTO Paciente (idPersona, estatura, peso) VALUES (?, ?, ?)";
+			psPaciente = conn.prepareStatement(sqlPaciente);
+			psPaciente.setString(1, paciente.getIdPersona());
+			psPaciente.setFloat(2, paciente.getEstatura());
+			psPaciente.setFloat(3, paciente.getPeso());
+
+			psPaciente.executeUpdate();
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+			JOptionPane.showMessageDialog(null, "Error al insertar el paciente en la base de datos", "Error", JOptionPane.ERROR_MESSAGE);
+		} finally {
+			try {
+				if (psPaciente != null) psPaciente.close();
+				if (psPersona != null) psPersona.close();
+				if (conn != null) conn.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 
 	public void insertarMedico(Medico medico) {
@@ -270,16 +359,28 @@ public class ClinicaMedica implements Serializable {
 		paciente.getMiHistorial().getLasConsultas().add(consulta);
 	}
 
-	public Consulta buscarConsultaById(String codigo) {
+	public Consulta getConsultaById(String codigo) {
 		Consulta consulta = null;
-		boolean encontrado = false;
-		int i = 0;
-		while(!encontrado && i < lasConsultas.size()) {
-			if(lasConsultas.get(i).getIdConsulta().equalsIgnoreCase(codigo)) {
-				consulta = lasConsultas.get(i);
-				encontrado = true;
+		String sql = "SELECT codConsulta, idPersona, fecha, diagnostico, indicacion, esImportante FROM Consulta WHERE codConsulta = ?";
+
+		try (Connection conn = new Conexion().getConexion();
+				PreparedStatement ps = conn.prepareStatement(sql)) {
+
+			ps.setString(1, codigo);
+			try (ResultSet rs = ps.executeQuery()) {
+				if (rs.next()) {
+					consulta = new Consulta(
+							rs.getString("codConsulta"),
+							rs.getString("idPersona"),
+							rs.getDate("fecha"),
+							rs.getString("diagnostico"),
+							rs.getString("indicacion"),
+							rs.getBoolean("esImportante")
+							);
+				}
 			}
-			i++;
+		} catch (SQLException e) {
+			e.printStackTrace();
 		}
 		return consulta;
 	}
@@ -320,17 +421,54 @@ public class ClinicaMedica implements Serializable {
 		System.out.println("Paciente no encontrado para actualizar.");
 	}
 
-	public Paciente buscarPacienteByCedula(String codigo) {
+	public Paciente buscarPacienteByIdPersona(String codigo) {
 		Paciente paciente = null;
-		boolean encontrado = false;
-		int i = 0;
-		while(!encontrado && i < losPacientes.size()) {
-			if(losPacientes.get(i).getCedula().equalsIgnoreCase(codigo)) {
-				paciente = losPacientes.get(i);
-				encontrado = true;
+		Connection con = null;
+		PreparedStatement stmt = null;
+		ResultSet rs = null;
+
+		try {
+			Conexion conexion = new Conexion();
+			con = conexion.getConexion();
+
+			String sql = "SELECT p.idPersona, p.cedula, p.nombre, p.apellido, p.telefono, p.direccion, p.fechaNacimiento, p.sexo, "
+					+ "pa.estatura, pa.peso "
+					+ "FROM Persona p "
+					+ "INNER JOIN Paciente pa ON p.idPersona = pa.idPersona "
+					+ "WHERE p.idPersona = ?";
+
+			stmt = con.prepareStatement(sql);
+			stmt.setString(1, codigo);
+
+			rs = stmt.executeQuery();
+
+			if (rs.next()) {
+				paciente = new Paciente(
+						rs.getString("idPersona"),
+						rs.getString("cedula"),
+						rs.getString("nombre"),
+						rs.getString("apellido"),
+						rs.getString("telefono"),
+						rs.getString("direccion"),
+						rs.getDate("fechaNacimiento"),
+						rs.getString("sexo").charAt(0),
+						rs.getFloat("estatura"),
+						rs.getFloat("peso")
+						);
 			}
-			i++;
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				if (rs != null) rs.close();
+				if (stmt != null) stmt.close();
+				if (con != null) con.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
 		}
+
 		return paciente;
 	}
 
@@ -357,11 +495,41 @@ public class ClinicaMedica implements Serializable {
 		return false; 
 	}
 
-	public void updatePaciente(Paciente selected) {
-		int index = buscarPacienteByCedulaGetIndex(selected.getCedula());
-		if(index != 1) {
-			losPacientes.set(index, selected);
-		}
+	public int updatePaciente(Paciente paciente) {
+		 int filasAfectadas = 0;
+		    String sqlPersona = "UPDATE Persona SET telefono = ?, direccion = ? WHERE idPersona = ?";
+		    String sqlPaciente = "UPDATE Paciente SET estatura = ?, peso = ? WHERE idPersona = ?";
+
+		    try (Connection conn = new Conexion().getConexion()) {
+		        conn.setAutoCommit(false); // Para asegurar que ambas actualizaciones se hagan juntas
+
+		        try (
+		            PreparedStatement psPersona = conn.prepareStatement(sqlPersona);
+		            PreparedStatement psPaciente = conn.prepareStatement(sqlPaciente)
+		        ) {
+		            // Actualizar en Persona
+		            psPersona.setString(1, paciente.getTelefono());
+		            psPersona.setString(2, paciente.getDireccion());
+		            psPersona.setString(3, paciente.getIdPersona());
+		            filasAfectadas += psPersona.executeUpdate();
+
+		            // Actualizar en Paciente
+		            psPaciente.setDouble(1, paciente.getEstatura());
+		            psPaciente.setDouble(2, paciente.getPeso());
+		            psPaciente.setString(3, paciente.getIdPersona());
+		            filasAfectadas += psPaciente.executeUpdate();
+
+		            conn.commit(); // Confirmar si todo fue bien
+		        } catch (SQLException ex) {
+		            conn.rollback(); // Revertir si algo falla
+		            ex.printStackTrace();
+		            return 0;
+		        }
+		    } catch (SQLException e) {
+		        e.printStackTrace();
+		    }
+
+		    return filasAfectadas;
 	}
 
 	public Medico buscarMedicoByCedula(String codigo) {
@@ -544,44 +712,44 @@ public class ClinicaMedica implements Serializable {
 	}
 
 	public void regUser(Usuario aux) {
-	    Connection conn = null;
-	    PreparedStatement psInsert = null;
-	    PreparedStatement psUpdateCod = null;
-	    try {
-	        conn = new Conexion().getConexion();
-	        conn.setAutoCommit(false); //Para hacer una transacción
+		Connection conn = null;
+		PreparedStatement psInsert = null;
+		PreparedStatement psUpdateCod = null;
+		try {
+			conn = new Conexion().getConexion();
+			conn.setAutoCommit(false); //Para hacer una transacción
 
-	        String sqlInsert = "INSERT INTO Usuario (idUsuario, usuario, contrasenia, idRol, idPersona) VALUES (?, ?, ?, ?, ?)";
-	        psInsert = conn.prepareStatement(sqlInsert);
-	        psInsert.setString(1, aux.getIdUsuario());
-	        psInsert.setString(2, aux.getUsuario());
-	        psInsert.setString(3, aux.getContrasenia());
-	        psInsert.setInt(4, aux.getIdRol());
-	        psInsert.setString(5, aux.getIdPersona());
+			String sqlInsert = "INSERT INTO Usuario (idUsuario, usuario, contrasenia, idRol, idPersona) VALUES (?, ?, ?, ?, ?)";
+			psInsert = conn.prepareStatement(sqlInsert);
+			psInsert.setString(1, aux.getIdUsuario());
+			psInsert.setString(2, aux.getUsuario());
+			psInsert.setString(3, aux.getContrasenia());
+			psInsert.setInt(4, aux.getIdRol());
+			psInsert.setString(5, aux.getIdPersona());
 
-	        int rows = psInsert.executeUpdate();
+			int rows = psInsert.executeUpdate();
 
-	        if(rows > 0) {
-	            conn.commit(); //Confirma
-	        } else {
-	            conn.rollback(); //No lo hagas
-	        }
-	    } catch (SQLException ex) {
-	        ex.printStackTrace();
-	        try {
-	            if(conn != null) conn.rollback();
-	        } catch (SQLException e) {
-	            e.printStackTrace();
-	        }
-	    } finally {
-	        try {
-	            if(psInsert != null) psInsert.close();
-	            if(psUpdateCod != null) psUpdateCod.close();
-	            if(conn != null) conn.close();
-	        } catch (SQLException e) {
-	            e.printStackTrace();
-	        }
-	    }
+			if(rows > 0) {
+				conn.commit(); //Confirma
+			} else {
+				conn.rollback(); //No lo hagas
+			}
+		} catch (SQLException ex) {
+			ex.printStackTrace();
+			try {
+				if(conn != null) conn.rollback();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		} finally {
+			try {
+				if(psInsert != null) psInsert.close();
+				if(psUpdateCod != null) psUpdateCod.close();
+				if(conn != null) conn.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 
 	public Enfermedad buscarEnfermedadById(String codigo) {
@@ -598,42 +766,59 @@ public class ClinicaMedica implements Serializable {
 		return enfermedad;
 	}
 
-	/*public Enfermedad buscarEnfermedadPacienteByCodigo(Paciente paciente, String codigo) {
-		ArrayList<Enfermedad> enfermedades = paciente.getMisEnfermedades();
-		Enfermedad enfermedad = null;
-		boolean encontrado = false;
-	    int i = 0;
-	    while (!encontrado && i < enfermedades.size()) { 
-	        if (enfermedades.get(i).getIdEnfermedad().equalsIgnoreCase(codigo)) { 
-	        	enfermedad = enfermedades.get(i); 
-	            encontrado = true; 
-	        }
-	        i++; 
-	    }
-	    return enfermedad;
-	}*/
+	public EnfermedadPaciente buscarEnfermedadPacienteByCodigo(String idPaciente, String codigoEnfermedad) {
+		EnfermedadPaciente enfermedadPaciente = null;
+		String sql = "SELECT e.idEnfermedad, e.nombre, e.sintomas, e.idTipoEnfermedad, he.estaCurado " +
+				"FROM Enfermedad e " +
+				"INNER JOIN Historial_Enfermedad he ON e.idEnfermedad = he.idEnfermedad " +
+				"INNER JOIN HistorialClinico hc ON he.idHistorialClinico = hc.idHistorialClinico " +
+				"WHERE hc.idPersona = ? AND e.idEnfermedad = ?";
+		try (Connection conn = new Conexion().getConexion();
+				PreparedStatement ps = conn.prepareStatement(sql)) {
+
+			ps.setString(1, idPaciente);
+			ps.setString(2, codigoEnfermedad);
+
+			try (ResultSet rs = ps.executeQuery()) {
+				if (rs.next()) {
+					Enfermedad enfermedad = new Enfermedad(
+							rs.getString("idEnfermedad"),
+							rs.getString("nombre"),
+							rs.getString("sintomas"),
+							rs.getInt("idTipoEnfermedad")
+							);
+					boolean estaCurado = rs.getBoolean("estaCurado");
+
+					enfermedadPaciente = new EnfermedadPaciente(enfermedad, estaCurado);
+				}
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return enfermedadPaciente;
+	}
 
 	public void updateUsuario(Usuario selected) {
-		 String sql = "UPDATE Usuario SET contrasenia = ?, idRol = ? WHERE idUsuario = ?";
+		String sql = "UPDATE Usuario SET contrasenia = ?, idRol = ? WHERE idUsuario = ?";
 
-		    try (Connection conn = new Conexion().getConexion();
-		         PreparedStatement ps = conn.prepareStatement(sql)) {
+		try (Connection conn = new Conexion().getConexion();
+				PreparedStatement ps = conn.prepareStatement(sql)) {
 
-		        ps.setString(1, selected.getContrasenia());
-		        ps.setInt(2, selected.getIdRol());
-		        ps.setString(3, selected.getIdUsuario());
+			ps.setString(1, selected.getContrasenia());
+			ps.setInt(2, selected.getIdRol());
+			ps.setString(3, selected.getIdUsuario());
 
-		        int rows = ps.executeUpdate();
+			int rows = ps.executeUpdate();
 
-		        if (rows > 0) {
-		            System.out.println("Usuario actualizado correctamente en la base de datos.");
-		        } else {
-		            System.out.println("No se encontró el usuario para actualizar.");
-		        }
+			if (rows > 0) {
+				System.out.println("Usuario actualizado correctamente en la base de datos.");
+			} else {
+				System.out.println("No se encontró el usuario para actualizar.");
+			}
 
-		    } catch (SQLException e) {
-		        e.printStackTrace();
-		    }
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 
 	}
 
@@ -741,19 +926,19 @@ public class ClinicaMedica implements Serializable {
 
 	public ArrayList<Rol> obtenerRoles() {
 		ArrayList<Rol> roles = new ArrayList<>();
-	    String sql = "SELECT idRol, descripcion FROM Rol";
+		String sql = "SELECT idRol, descripcion FROM Rol";
 
-	    try (Connection conn = new Conexion().getConexion();
-	         PreparedStatement ps = conn.prepareStatement(sql);
-	         ResultSet rs = ps.executeQuery()) {
+		try (Connection conn = new Conexion().getConexion();
+				PreparedStatement ps = conn.prepareStatement(sql);
+				ResultSet rs = ps.executeQuery()) {
 
-	        while (rs.next()) {
-	            roles.add(new Rol(rs.getInt("idRol"), rs.getString("descripcion")));
-	        }
-	    } catch (SQLException e) {
-	        e.printStackTrace();
-	    }
-	    return roles;
+			while (rs.next()) {
+				roles.add(new Rol(rs.getInt("idRol"), rs.getString("descripcion")));
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return roles;
 	}
 
 	public Persona buscarPersonabyCodigo(String codigo) {
@@ -844,34 +1029,240 @@ public class ClinicaMedica implements Serializable {
 		return nuevoCodigo;
 	}
 
-	public Persona buscarPersonabyIdPersona(String idPersona) {
-		Persona persona = null;
-	    String sql = "SELECT * FROM Persona WHERE idPersona = ?";
 
-	    try (Connection conn = new Conexion().getConexion();
-	         PreparedStatement ps = conn.prepareStatement(sql)) {
+	public static String generarNuevoCodigoPaciente() {
+		String nuevoCodigo = "Pac-1"; // Valor por defecto si no hay pacientes
 
-	        ps.setString(1, idPersona);
-	        ResultSet rs = ps.executeQuery();
+		try {
+			Connection conn = new Conexion().getConexion();
+			String sql = "SELECT MAX(CAST(SUBSTRING(idPersona, 5, LEN(idPersona)) AS INT)) FROM Persona WHERE idPersona LIKE 'Pac-%'";
+			PreparedStatement ps = conn.prepareStatement(sql);
+			ResultSet rs = ps.executeQuery();
 
-	        if (rs.next()) {
-	            String cedula = rs.getString("cedula");
-	            String nombre = rs.getString("nombre");
-	            String apellido = rs.getString("apellido");
-	            String telefono = rs.getString("telefono");
-	            String direccion = rs.getString("direccion");
-	            Date fechaNacimiento = rs.getDate("fechaNacimiento");
-	            char sexo = rs.getString("sexo").charAt(0);
+			if (rs.next()) {
+				int ultimoNumero = rs.getInt(1);
+				nuevoCodigo = "Pac-" + (ultimoNumero + 1);
+			}
 
-	            // Construyes la persona según tu clase Persona
-	            persona = new Persona(idPersona, cedula, nombre, apellido, telefono, direccion, fechaNacimiento, sexo);
-	        }
+			rs.close();
+			ps.close();
+			conn.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 
-	    } catch (SQLException e) {
-	        e.printStackTrace();
-	    }
-
-	    return persona;
+		return nuevoCodigo;
 	}
+
+	public ArrayList<VacunaAplicada> getVacunasDeUnPaciente(String idPaciente) {
+
+		ArrayList<VacunaAplicada> vacunasAplicadas = new ArrayList<>();
+		String sql = "SELECT v.idVacuna, v.nombre, v.codTipoVacuna, v.idFabricante, v.fechaVencimiento, " +
+				"v.cantStock, hv.fecha AS fechaAplicacion " +
+				"FROM Vacuna v " +
+				"INNER JOIN Historial_Vacunacion hv ON v.idVacuna = hv.idVacuna " +
+				"INNER JOIN HistorialClinico hc ON hv.idHistorialClinico = hc.idHistorialClinico " +
+				"WHERE hc.idPersona = ?";
+		try (Connection conn = new Conexion().getConexion();
+				PreparedStatement ps = conn.prepareStatement(sql)) {
+
+			ps.setString(1, idPaciente);
+			ResultSet rs = ps.executeQuery();
+
+			while (rs.next()) {
+				Vacuna vacuna = new Vacuna(
+						rs.getString("idVacuna"),
+						rs.getString("nombre"),
+						rs.getInt("codTipoVacuna"),
+						rs.getInt("idFabricante"),
+						rs.getDate("fechaVencimiento"),
+						rs.getInt("cantStock")
+						);
+				Date fechaAplicacion = rs.getDate("fechaAplicacion");
+
+				vacunasAplicadas.add(new VacunaAplicada(vacuna, fechaAplicacion));
+			}
+			rs.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return vacunasAplicadas;
+	}
+
+	public TipoVacuna buscarTipoVacunaPorId(int codTipoVacuna) {
+		TipoVacuna tipo = null;
+		try {
+			Connection conn = new Conexion().getConexion();
+			String sql = "SELECT * FROM TipoVacuna WHERE codTipoVacuna = ?";
+			PreparedStatement ps = conn.prepareStatement(sql);
+			ps.setInt(1, codTipoVacuna);
+			ResultSet rs = ps.executeQuery();
+
+			if (rs.next()) {
+				String nombreTipo = rs.getString("nombreTipo");
+				tipo = new TipoVacuna(codTipoVacuna, nombreTipo);
+			}
+
+			rs.close();
+			ps.close();
+			conn.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return tipo;
+	}
+
+	public Fabricante buscarFabricantePorId(int idFabricante) {
+		Fabricante fabricante = null;
+		try {
+			Connection conn = new Conexion().getConexion();
+			String sql = "SELECT * FROM Fabricante WHERE idFabricante = ?";
+			PreparedStatement ps = conn.prepareStatement(sql);
+			ps.setInt(1, idFabricante);
+			ResultSet rs = ps.executeQuery();
+
+			if (rs.next()) {
+				String nombre = rs.getString("nombre");
+				fabricante = new Fabricante(idFabricante, nombre);
+			}
+
+			rs.close();
+			ps.close();
+			conn.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return fabricante;
+	}
+
+	public ArrayList<Consulta> getConsultasImportantesByIdPersona(String idPersona) {
+		ArrayList<Consulta> consultas = new ArrayList<>();
+
+		try {
+			Connection conn = new Conexion().getConexion();
+
+			String sql = "SELECT c.codConsulta, c.idPersona, c.fecha, c.diagnostico, c.indicacion, c.esImportante " + 
+					"FROM HistorialClinico hc " + 
+					"INNER JOIN Historial_Consulta hcon ON hc.idHistorialClinico = hcon.idHistorial " + 
+					"INNER JOIN Consulta c ON hcon.codConsulta = c.codConsulta " + 
+					"WHERE hc.idPersona = ? AND c.esImportante = 1 ";
+
+			PreparedStatement ps = conn.prepareStatement(sql);
+			ps.setString(1, idPersona);
+			ResultSet rs = ps.executeQuery();
+
+			while (rs.next()) {
+				Consulta consulta = new Consulta(
+						rs.getString("codConsulta"),
+						rs.getString("idPersona"),
+						rs.getDate("fecha"),
+						rs.getString("diagnostico"),
+						rs.getString("indicacion"),
+						rs.getBoolean("esImportante")
+						);
+				consultas.add(consulta);
+			}
+
+			rs.close();
+			ps.close();
+			conn.close();
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+
+		return consultas;
+	}
+
+	public ArrayList<EnfermedadPaciente> getEnfermedadesByHistorial(String idPaciente) {
+		ArrayList<EnfermedadPaciente> enfermedades = new ArrayList<>();
+
+		try {
+			Connection conn = new Conexion().getConexion();
+
+			String sql = "SELECT e.idEnfermedad, e.nombre, e.sintomas, e.idTipoEnfermedad, he.estaCurado " + 
+					"FROM HistorialClinico hc " + 
+					"INNER JOIN Historial_Enfermedad he ON hc.idHistorialClinico = he.idHistorialClinico " + 
+					"INNER JOIN Enfermedad e ON he.idEnfermedad = e.idEnfermedad " + 
+					"WHERE hc.idPersona = ?";
+
+			PreparedStatement ps = conn.prepareStatement(sql);
+			ps.setString(1, idPaciente);
+			ResultSet rs = ps.executeQuery();
+
+			while (rs.next()) {
+				Enfermedad enfermedad = new Enfermedad(
+						rs.getString("idEnfermedad"),
+						rs.getString("nombre"),
+						rs.getString("sintomas"),
+						rs.getInt("idTipoEnfermedad")
+						);
+				EnfermedadPaciente ep = new EnfermedadPaciente(enfermedad, rs.getBoolean("estaCurado"));
+				enfermedades.add(ep);
+			}
+
+			rs.close();
+			ps.close();
+			conn.close();
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+
+		return enfermedades;
+	}
+
+	public int curarEnfermedadPaciente(String idEnfermedad, String idPersona) {
+		String sql = "UPDATE he " +
+				"SET he.estaCurado = 1 " +
+				"FROM Historial_Enfermedad he " +
+				"INNER JOIN HistorialClinico hc ON he.idHistorialClinico = hc.idHistorialClinico " +
+				"WHERE hc.idPersona = ? AND he.idEnfermedad = ?";
+
+		try (Connection conn = new Conexion().getConexion();
+				PreparedStatement ps = conn.prepareStatement(sql)) {
+
+			ps.setString(1, idPersona);
+			ps.setString(2, idEnfermedad);
+
+			int filasActualizadas = ps.executeUpdate();
+
+			if (filasActualizadas > 0) {
+				return 1; // actualización exitosa
+			} else {
+				return 0; // no se encontró o no se actualizó nada
+			}
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return 0; 
+		}
+	}
+
+	public String getTipoEnfermedadByIdEnfermedad(int idTipoEnfermedad) {
+		String tipoNombre = null;
+		String sql = "SELECT nombre FROM TipoEnfermedad WHERE idTipoEnfermedad = ?";
+
+		try (Connection conn = new Conexion().getConexion();
+				PreparedStatement ps = conn.prepareStatement(sql)) {
+
+			ps.setInt(1, idTipoEnfermedad);
+
+			try (ResultSet rs = ps.executeQuery()) {
+				if (rs.next()) {
+					tipoNombre = rs.getString("nombre");
+				}
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return tipoNombre;
+	}
+
+
+
+
+
+
 
 }

@@ -20,6 +20,8 @@ import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 
+import logico.ClinicaMedica;
+import logico.HistoriaClinica;
 import logico.Paciente;
 import visual.enfermedad.ListadoEnfermedadesPaciente;
 import visual.medico.HistorialMedico;
@@ -149,7 +151,8 @@ public class DetallePaciente extends JDialog {
 				panel_1.add(label_6);
 				
 				spnFechaNacim = new JSpinner();
-				spnFechaNacim.setModel(new SpinnerDateModel(new Date(1732420800000L), null, null, Calendar.DAY_OF_YEAR));
+				spnFechaNacim.setModel(new SpinnerDateModel(new Date(), null, null, Calendar.MILLISECOND));
+				spnFechaNacim.setEditor(new JSpinner.DateEditor(spnFechaNacim, "dd/MM/yyyy"));
 				spnFechaNacim.setEnabled(false);
 				spnFechaNacim.setBounds(141, 142, 129, 20);
 				panel_1.add(spnFechaNacim);
@@ -190,7 +193,7 @@ public class DetallePaciente extends JDialog {
 				panel_1.add(spnEdad);
 				
 				txtSexo = new JTextField();
-				txtSexo.setEnabled(false);
+				txtSexo.setEditable(false);
 				txtSexo.setBounds(455, 142, 91, 20);
 				panel_1.add(txtSexo);
 				txtSexo.setColumns(10);
@@ -282,10 +285,35 @@ public class DetallePaciente extends JDialog {
 			txtTelefono.setText(selected.getTelefono());
 			txtDireccion.setText(selected.getDireccion());
 			spnFechaNacim.setValue(selected.getFechaNacimiento());
-			spnEdad.setValue(selected.getEdad());
-			txtSexo.setText(selected.getSexo());
+			spnEdad.setValue(calcularEdad(selected.getFechaNacimiento()));
+			char sexo = selected.getSexo();
+			if (sexo == 'M') {
+			    txtSexo.setText("Masculino");
+			} else if (sexo == 'F') {
+			    txtSexo.setText("Femenino");
+			} else {
+			    txtSexo.setText(""); // Por si acaso viene nulo u otro valor
+			}
 			spnEstatura.setValue(selected.getEstatura());
 			spnPeso.setValue(selected.getPeso());
 		}
+	}
+	
+	private int calcularEdad(Date fechaNacimiento) {
+	    if (fechaNacimiento == null) return 0;
+
+	    Calendar nacimiento = Calendar.getInstance();
+	    nacimiento.setTime(fechaNacimiento);
+
+	    Calendar hoy = Calendar.getInstance();
+
+	    int edad = hoy.get(Calendar.YEAR) - nacimiento.get(Calendar.YEAR);
+
+	    // Verifica si aún no ha cumplido años en este año
+	    if (hoy.get(Calendar.DAY_OF_YEAR) < nacimiento.get(Calendar.DAY_OF_YEAR)) {
+	        edad--;
+	    }
+
+	    return edad;
 	}
 }

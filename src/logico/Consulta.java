@@ -11,13 +11,13 @@ public class Consulta implements Serializable{
 	private static final long serialVersionUID = 1L;
 	
 	private String codConsulta;
-	private int idPersona;
+	private String idPersona;
 	private Date fecha;
 	private String diagnostico;
 	private String indicacion;
 	private boolean esImportante;
 	
-	public Consulta(String codConsulta, int idPersona, Date fecha, String diagnostico, String indicacion,
+	public Consulta(String codConsulta, String idPersona, Date fecha, String diagnostico, String indicacion,
 			boolean esImportante) {
 		super();
 		this.codConsulta = codConsulta;
@@ -36,11 +36,11 @@ public class Consulta implements Serializable{
 		this.codConsulta = codConsulta;
 	}
 
-	public int getIdPersona() {
+	public String getIdPersona() {
 		return idPersona;
 	}
 
-	public void setIdPersona(int idPersona) {
+	public void setIdPersona(String idPersona) {
 		this.idPersona = idPersona;
 	}
 
