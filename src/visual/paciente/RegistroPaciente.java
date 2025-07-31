@@ -278,6 +278,7 @@ public class RegistroPaciente extends JDialog {
 					        }
 
 							ClinicaMedica.getInstance().insertarPaciente(paciente);
+							ClinicaMedica.getInstance().insertarHistorialClinico(paciente.getIdPersona());
 							JOptionPane.showMessageDialog(null,"Operacion exitosa","Informacion",JOptionPane.INFORMATION_MESSAGE);
 							clean();
 						}

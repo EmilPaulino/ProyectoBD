@@ -1259,10 +1259,28 @@ public class ClinicaMedica implements Serializable {
 		return tipoNombre;
 	}
 
+	public void insertarHistorialClinico(String idPersona) {
+	    Connection con = null;
+	    PreparedStatement ps = null;
 
+	    try {
+	        Conexion conexion = new Conexion();
+	        con = conexion.getConexion();
 
+	        String sql = "INSERT INTO HistorialClinico (idPersona) VALUES (?)";
+	        ps = con.prepareStatement(sql);
+	        ps.setString(1, idPersona);
+	        ps.executeUpdate();
 
-
-
-
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	    } finally {
+	        try {
+	            if (ps != null) ps.close();
+	            if (con != null) con.close();
+	        } catch (SQLException e) {
+	            e.printStackTrace();
+	        }
+	    }
+	}
 }
