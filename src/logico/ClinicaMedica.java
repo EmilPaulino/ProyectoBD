@@ -1093,7 +1093,7 @@ public class ClinicaMedica implements Serializable {
 		TipoVacuna tipo = null;
 		try {
 			Connection conn = new Conexion().getConexion();
-			String sql = "SELECT * FROM TipoVacuna WHERE codTipoVacuna = ?";
+			String sql = "SELECT nombreTipo FROM TipoVacuna WHERE codTipoVacuna = ?";
 			PreparedStatement ps = conn.prepareStatement(sql);
 			ps.setInt(1, codTipoVacuna);
 			ResultSet rs = ps.executeQuery();

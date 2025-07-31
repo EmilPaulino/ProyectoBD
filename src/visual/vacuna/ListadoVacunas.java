@@ -101,8 +101,8 @@ public class ListadoVacunas extends JDialog {
 	        
 			row[0] = vacunas.getVacuna().getIdVacuna();
 		    row[1] = vacunas.getVacuna().getNombre();
-		    row[2] = tipo;
-		    row[3] = fab;
+		    row[2] = tipo.getNombreTipo();
+		    row[3] = fab.getNombre();
 		    row[4] = dateFormatter.format(vacunas.getFechaAplicacion());
 
 		    modelo.addRow(row);
