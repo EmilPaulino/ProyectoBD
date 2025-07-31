@@ -1,4 +1,4 @@
-
+src/conexionsql/
 /clinica.dat
 bin/ 
 *.class
