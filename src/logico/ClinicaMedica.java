@@ -1241,7 +1241,7 @@ public class ClinicaMedica implements Serializable {
 
 	public String getTipoEnfermedadByIdEnfermedad(int idTipoEnfermedad) {
 		String tipoNombre = null;
-		String sql = "SELECT nombre FROM TipoEnfermedad WHERE idTipoEnfermedad = ?";
+		String sql = "SELECT nombreTipo FROM TipoEnfermedad WHERE idTipoEnfermedad = ?";
 
 		try (Connection conn = new Conexion().getConexion();
 				PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -1250,7 +1250,7 @@ public class ClinicaMedica implements Serializable {
 
 			try (ResultSet rs = ps.executeQuery()) {
 				if (rs.next()) {
-					tipoNombre = rs.getString("nombre");
+					tipoNombre = rs.getString("nombreTipo");
 				}
 			}
 		} catch (SQLException e) {

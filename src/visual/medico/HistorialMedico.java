@@ -122,19 +122,20 @@ public class HistorialMedico extends JDialog {
 		}
 		loadHistorial();
 	}
-	private void loadHistorial(){
-		if(selected!=null) {
-			modelo.setRowCount(0);
-			ArrayList<Consulta> consultas = ClinicaMedica.getInstance().getConsultasImportantesByIdPersona(selected.getIdPersona());
-			row = new Object[table.getColumnCount()];
-			for(Consulta consulta:selected.getMiHistorial().getLasConsultas()) {
-				row[0] = consulta.getCodConsulta();
-				row[1] = consulta.getFecha();
-				row[2] = consulta.getDiagnostico();
-				Persona persona = ClinicaMedica.getInstance().buscarPersonabyCodigo(consulta.getIdPersona());
-				row[3] = persona.getNombre()+' '+persona.getApellido();
-				modelo.addRow(row);
-			}
-		}
+	private void loadHistorial() {
+	    if (selected != null) {
+	        modelo.setRowCount(0);
+	        ArrayList<Consulta> consultas = ClinicaMedica.getInstance().getConsultasImportantesByIdPersona(selected.getIdPersona());
+	        row = new Object[table.getColumnCount()];
+
+	        for (Consulta consulta : consultas) {
+	            row[0] = consulta.getCodConsulta();
+	            row[1] = consulta.getFecha();
+	            row[2] = consulta.getDiagnostico();
+	            Persona persona = ClinicaMedica.getInstance().buscarPersonabyCodigo(consulta.getIdPersona());
+	            row[3] = persona.getNombre() + " " + persona.getApellido();
+	            modelo.addRow(row);
+	        }
+	    }
 	}
 }
