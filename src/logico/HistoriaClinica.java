@@ -12,7 +12,7 @@ public class HistoriaClinica implements Serializable {
 	private int idHistorialClinico;
 	private String idPersona;
 	private ArrayList<Consulta> misConsultas;
-	private ArrayList<Vacuna>misVacunas;
+	private ArrayList<VacunaAplicada>misVacunas;
 	private ArrayList<Enfermedad>misEnfermedades;
 	
 	public HistoriaClinica() {
@@ -47,11 +47,11 @@ public class HistoriaClinica implements Serializable {
 		this.misConsultas = misConsultas;
 	}
 
-	public ArrayList<Vacuna> getMisVacunas() {
+	public ArrayList<VacunaAplicada> getMisVacunas() {
 		return misVacunas;
 	}
 
-	public void setMisVacunas(ArrayList<Vacuna> misVacunas) {
+	public void setMisVacunas(ArrayList<VacunaAplicada> misVacunas) {
 		this.misVacunas = misVacunas;
 	}
 

@@ -15,8 +15,12 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.table.DefaultTableModel;
 
+import logico.ClinicaMedica;
 import logico.Paciente;
 import logico.Vacuna;
+import logico.VacunaAplicada;
+import logico.TipoVacuna;
+import logico.Fabricante;
 
 public class ListadoVacunas extends JDialog {
 	private final JPanel contentPanel = new JPanel();
@@ -59,7 +63,7 @@ public class ListadoVacunas extends JDialog {
 				{
 					table = new JTable();
 					modelo = new DefaultTableModel();
-					String[] identificadores = {"Código", "Nombre", "Tipo", "Fabricante", "Fecha Vencimiento"};
+					String[] identificadores = {"Código", "Nombre", "Tipo", "Fabricante", "Fecha Aplicación"};
 					modelo.setColumnIdentifiers(identificadores);
 					table.setModel(modelo);
 					scrollPane.setViewportView(table);
@@ -89,14 +93,18 @@ public class ListadoVacunas extends JDialog {
 	    SimpleDateFormat dateFormatter = new SimpleDateFormat("dd/MM/yyyy");
 
 		modelo.setRowCount(0);
-		ArrayList<Vacuna> vac = paciente.getMisVacunas();
+		ArrayList<VacunaAplicada> vac = ClinicaMedica.getInstance().getVacunasDeUnPaciente(paciente.getIdPersona());
 		row = new Object[table.getColumnCount()];
-		for(Vacuna vacunas:vac) {
-			row[0] = vacunas.getIdVacuna();
-		    row[1] = vacunas.getNombreVacuna();
-	        row[2] = vacunas.getTipo();
-		    row[3] = vacunas.getFabricante();
-		    row[4] = dateFormatter.format(vacunas.getFecha());
+		for(VacunaAplicada vacunas:vac) {
+			TipoVacuna tipo = ClinicaMedica.getInstance().buscarTipoVacunaPorId(vacunas.getVacuna().getCodTipoVacuna());
+	        Fabricante fab = ClinicaMedica.getInstance().buscarFabricantePorId(vacunas.getVacuna().getIdFabricante());
+	        
+			row[0] = vacunas.getVacuna().getIdVacuna();
+		    row[1] = vacunas.getVacuna().getNombre();
+		    row[2] = tipo;
+		    row[3] = fab;
+		    row[4] = dateFormatter.format(vacunas.getFechaAplicacion());
+
 		    modelo.addRow(row);
 		}
 	}

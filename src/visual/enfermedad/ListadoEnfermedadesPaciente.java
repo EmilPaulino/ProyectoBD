@@ -5,6 +5,7 @@ import java.awt.FlowLayout;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 import java.awt.event.ActionListener;
@@ -13,8 +14,11 @@ import java.awt.event.ActionEvent;
 import javax.swing.border.TitledBorder;
 import javax.swing.table.DefaultTableModel;
 
+import com.sun.javafx.scene.control.SelectedCellsMap;
+
 import logico.ClinicaMedica;
 import logico.Enfermedad;
+import logico.EnfermedadPaciente;
 import logico.Paciente;
 
 import javax.swing.JScrollPane;
@@ -31,7 +35,7 @@ public class ListadoEnfermedadesPaciente extends JDialog {
 	private static Object[] row;
 	private JButton btnCurar;
 	private int index = -1;
-	Enfermedad enf;
+	EnfermedadPaciente enf;
 
 	/**
 	 * Launch the application.
@@ -74,7 +78,7 @@ public class ListadoEnfermedadesPaciente extends JDialog {
 							if(index >= 0) {
 								btnCurar.setEnabled(true);
 								String codigo = table.getValueAt(index, 0).toString();
-								enf = ClinicaMedica.getInstance().buscarEnfermedadPacienteByCodigo(paciente, codigo);
+								enf = ClinicaMedica.getInstance().buscarEnfermedadPacienteByCodigo(paciente.getIdPersona(), codigo);
 							}
 						}
 					});
@@ -102,7 +106,12 @@ public class ListadoEnfermedadesPaciente extends JDialog {
 					btnCurar = new JButton("Curar Enfermedad");
 					btnCurar.addActionListener(new ActionListener() {
 						public void actionPerformed(ActionEvent e) {
-							enf.setCurada(true);
+							int Result = ClinicaMedica.getInstance().curarEnfermedadPaciente(enf.getEnfermedad().getIdEnfermedad(), paciente.getIdPersona());
+							if(Result == 1) {
+								JOptionPane.showMessageDialog(null, "La enfermedad se curó exitosamente.", "Éxito", JOptionPane.INFORMATION_MESSAGE);
+							} else {
+								JOptionPane.showMessageDialog(null, "No se pudo curar la enfermedad.", "Error", JOptionPane.ERROR_MESSAGE);
+							}
 							btnCurar.setEnabled(false);
 							loadEnfermedades();
 						}
@@ -119,13 +128,14 @@ public class ListadoEnfermedadesPaciente extends JDialog {
 
 	private void loadEnfermedades() {
 		modelo.setRowCount(0);
-		ArrayList<Enfermedad> enf = paciente.getMisEnfermedades();
+		ArrayList<EnfermedadPaciente> enf = ClinicaMedica.getInstance().getEnfermedadesByHistorial(paciente.getIdPersona());
 		row = new Object[table.getColumnCount()];
-		for(Enfermedad enfermedad : enf) {
-			row[0] = enfermedad.getIdEnfermedad();
-			row[1] = enfermedad.getNombre();
-			row[2] = enfermedad.getTipo();
-			if(enfermedad.isCurada()) {
+		for(EnfermedadPaciente enfermedad : enf) {
+			row[0] = enfermedad.getEnfermedad().getIdEnfermedad();
+			row[1] = enfermedad.getEnfermedad().getNombre();
+			String tipo = ClinicaMedica.getInstance().getTipoEnfermedadByIdEnfermedad(enfermedad.getEnfermedad().getIdTipoEnfermedad());
+			row[2] = tipo;
+			if(enfermedad.estaCurado()) {
 				row[3] = "Si";
 			}
 			else {

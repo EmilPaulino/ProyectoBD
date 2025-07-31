@@ -293,7 +293,7 @@ public class RegistroUsuario extends JDialog {
             }
             
             String idPersona = selected.getIdPersona();
-            persona = ClinicaMedica.getInstance().buscarPersonabyIdPersona(idPersona);
+            persona = ClinicaMedica.getInstance().buscarPersonabyCodigo(idPersona);
 
             if (persona != null) {
                 txtIDPersona.setText(persona.getIdPersona()); // o lo que necesites mostrar

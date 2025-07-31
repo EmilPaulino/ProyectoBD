@@ -10,14 +10,14 @@ public class Vacuna implements Serializable {
 	 */
 	private static final long serialVersionUID = 1L;
 	
-	private int idVacuna;
+	private String idVacuna;
 	private String nombre;
 	private int codTipoVacuna;
 	private int idFabricante;
 	private Date fechaVencimiento;
 	private int cantStock;
 	
-	public Vacuna(int idVacuna, String nombre, int codTipoVacuna, int idFabricante, Date fechaVencimiento,
+	public Vacuna(String idVacuna, String nombre, int codTipoVacuna, int idFabricante, Date fechaVencimiento,
 			int cantStock) {
 		super();
 		this.idVacuna = idVacuna;
@@ -28,11 +28,11 @@ public class Vacuna implements Serializable {
 		this.cantStock = cantStock;
 	}
 
-	public int getIdVacuna() {
+	public String getIdVacuna() {
 		return idVacuna;
 	}
 
-	public void setIdVacuna(int idVacuna) {
+	public void setIdVacuna(String idVacuna) {
 		this.idVacuna = idVacuna;
 	}
 
