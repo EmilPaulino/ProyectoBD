@@ -1,3 +1,4 @@
 
 /clinica.dat
-
+bin/ 
+*.class
