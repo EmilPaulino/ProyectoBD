@@ -115,12 +115,13 @@ public class ListadoEnfermedades extends JDialog {
 	}
 	public static void loadEnfermedades() {
 		modelo.setRowCount(0);
-		ArrayList<Enfermedad> enf = ClinicaMedica.getInstance().getLasEnfermedades();
+		ArrayList<Enfermedad> enf = ClinicaMedica.getInstance().getTodasLasEnfermedades();
 		row = new Object[table.getColumnCount()];
 		for(Enfermedad enfermedad : enf) {
 			row[0] = enfermedad.getIdEnfermedad();
 			row[1] = enfermedad.getNombre();
-			row[2] = enfermedad.getTipo();
+			String tipo = ClinicaMedica.getInstance().getTipoEnfermedadByIdEnfermedad(enfermedad.getIdTipoEnfermedad());
+			row[2] = tipo;
 			modelo.addRow(row);
 		}
 		
