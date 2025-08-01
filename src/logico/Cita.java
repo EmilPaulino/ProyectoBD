@@ -1,6 +1,7 @@
 package logico;
 
 import java.io.Serializable;
+import java.sql.Time;
 import java.util.Date;
 
 public class Cita implements Serializable {
@@ -10,14 +11,14 @@ public class Cita implements Serializable {
 	 */
 	private static final long serialVersionUID = 1L;
 	
-	private int codCita;
-	private int idPersona;
+	private String codCita;
+	private String idPersona;
 	private String nombre;
 	private Date fecha;
 	private Date hora;
 	private String motivo;
 	
-	public Cita(int codCita, int idPersona, String nombre, Date fecha, Date hora, String motivo) {
+	public Cita(String codCita, String idPersona, String nombre, Date fecha, Date hora, String motivo) {
 		super();
 		this.codCita = codCita;
 		this.idPersona = idPersona;
@@ -27,19 +28,19 @@ public class Cita implements Serializable {
 		this.motivo = motivo;
 	}
 
-	public int getCodCita() {
+	public String getCodCita() {
 		return codCita;
 	}
 
-	public void setCodCita(int codCita) {
+	public void setCodCita(String codCita) {
 		this.codCita = codCita;
 	}
 
-	public int getIdPersona() {
+	public String getIdPersona() {
 		return idPersona;
 	}
 
-	public void setIdPersona(int idPersona) {
+	public void setIdPersona(String idPersona) {
 		this.idPersona = idPersona;
 	}
 

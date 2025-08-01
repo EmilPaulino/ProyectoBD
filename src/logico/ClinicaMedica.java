@@ -5,6 +5,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Time;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -230,7 +231,52 @@ public class ClinicaMedica implements Serializable {
 	}
 
 	public ArrayList<Medico> getLosMedicos() {
-		return losMedicos;
+	    ArrayList<Medico> medicos = new ArrayList<>();
+	    Connection con = null;
+	    PreparedStatement stmt = null;
+	    ResultSet rs = null;
+
+	    try {
+	        Conexion conexion = new Conexion();
+	        con = conexion.getConexion();
+
+	        String sql = "SELECT p.idPersona, p.cedula, p.nombre, p.apellido, p.telefono, p.direccion, "
+	                   + "p.fechaNacimiento, p.sexo, m.idEspecialidad, m.exequatur "
+	                   + "FROM Persona p "
+	                   + "INNER JOIN Medico m ON p.idPersona = m.idPersona";
+
+	        stmt = con.prepareStatement(sql);
+	        rs = stmt.executeQuery();
+
+	        while (rs.next()) {
+	            Medico medico = new Medico(
+	                rs.getString("idPersona"),
+	                rs.getString("cedula"),
+	                rs.getString("nombre"),
+	                rs.getString("apellido"),
+	                rs.getString("telefono"),
+	                rs.getString("direccion"),
+	                rs.getDate("fechaNacimiento"),
+	                rs.getString("sexo").charAt(0),
+	                rs.getInt("idEspecialidad"),
+	                rs.getInt("exequatur")
+	            );
+	            medicos.add(medico);
+	        }
+
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	    } finally {
+	        try {
+	            if (rs != null) rs.close();
+	            if (stmt != null) stmt.close();
+	            if (con != null) con.close();
+	        } catch (SQLException e) {
+	            e.printStackTrace();
+	        }
+	    }
+
+	    return medicos;
 	}
 
 	public void setLosMedicos(ArrayList<Medico> losMedicos) {
@@ -282,8 +328,46 @@ public class ClinicaMedica implements Serializable {
 	}
 
 	public ArrayList<Cita> getLasCitas() {
-		return lasCitas;
+	    ArrayList<Cita> citas = new ArrayList<>();
+	    Connection con = null;
+	    PreparedStatement ps = null;
+	    ResultSet rs = null;
+
+	    try {
+	        Conexion conexion = new Conexion();
+	        con = conexion.getConexion();
+
+	        String sql = "SELECT codCita, idPersona, nombre, fecha, hora, motivo FROM Cita"; 
+	        ps = con.prepareStatement(sql);
+	        rs = ps.executeQuery();
+
+	        while (rs.next()) {
+	            String codCita = rs.getString("codCita");
+	            String idMedico = rs.getString("idPersona");
+	            String nombre = rs.getString("nombre");
+	            Date fecha = rs.getDate("fecha");
+	            Time hora = rs.getTime("hora");
+	            String motivo = rs.getString("motivo");
+
+	            Cita cita = new Cita(codCita, idMedico, nombre, fecha, hora, motivo);
+	            citas.add(cita);
+	        }
+
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	    } finally {
+	        try {
+	            if (rs != null) rs.close();
+	            if (ps != null) ps.close();
+	            if (con != null) con.close();
+	        } catch (SQLException e) {
+	            e.printStackTrace();
+	        }
+	    }
+
+	    return citas;
 	}
+
 
 	public void setLasCitas(ArrayList<Cita> lasCitas) {
 		this.lasCitas = lasCitas;
@@ -360,8 +444,36 @@ public class ClinicaMedica implements Serializable {
 	}
 
 	public void insertarCita (Cita cita) {
-		lasCitas.add(cita);
-		codCita++;
+		Connection con = null;
+	    PreparedStatement ps = null;
+
+	    try {
+	        Conexion conexion = new Conexion();
+	        con = conexion.getConexion();
+
+	        String sql = "INSERT INTO Cita (codCita, idPersona, nombre, fecha, hora, motivo) "
+	                   + "VALUES (?, ?, ?, ?, ?, ?)";
+
+	        ps = con.prepareStatement(sql);
+	        ps.setString(1, cita.getCodCita());
+	        ps.setString(2, cita.getIdPersona());
+	        ps.setString(3, cita.getNombre());
+	        ps.setDate(4, new java.sql.Date(cita.getFecha().getTime()));
+	        ps.setTime(5, new java.sql.Time(cita.getHora().getTime()));
+	        ps.setString(6, cita.getMotivo());
+	        ps.executeUpdate();
+
+
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	    } finally {
+	        try {
+	            if (ps != null) ps.close();
+	            if (con != null) con.close();
+	        } catch (SQLException e) {
+	            e.printStackTrace();
+	        }
+	    }
 	}
 
 	public static int getCodUsuario() {
@@ -682,18 +794,47 @@ public class ClinicaMedica implements Serializable {
 	}
 
 	public Cita buscarCitaByIdCita(String idCita) {
-		Cita cita = null;
-		boolean encontrado = false;
-		int i = 0;
-		while (!encontrado && i < lasCitas.size()) { 
-			if (lasCitas.get(i).getIdCita().equalsIgnoreCase(idCita)) { 
-				cita = lasCitas.get(i); 
-				encontrado = true; 
-			}
-			i++; 
-		}
-		return cita; 
+	    Cita cita = null;
+	    Connection con = null;
+	    PreparedStatement ps = null;
+	    ResultSet rs = null;
+
+	    try {
+	        Conexion conexion = new Conexion();
+	        con = conexion.getConexion();
+
+	        String sql = "SELECT codCita, idPersona, nombre, fecha, hora, motivo FROM Cita WHERE codCita = ?";
+	        ps = con.prepareStatement(sql);
+	        ps.setString(1, idCita);
+
+	        rs = ps.executeQuery();
+
+	        if (rs.next()) {
+	            String id = rs.getString("codCita");
+	            String idPersona = rs.getString("idPersona");
+	            String nombre = rs.getString("nombre");
+	            Date fecha = rs.getDate("fecha");
+	            Time hora = rs.getTime("hora");
+	            String motivo = rs.getString("motivo");
+
+	            cita = new Cita(id, idPersona, nombre, fecha, hora, motivo);
+	        }
+
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	    } finally {
+	        try {
+	            if (rs != null) rs.close();
+	            if (ps != null) ps.close();
+	            if (con != null) con.close();
+	        } catch (SQLException ex) {
+	            ex.printStackTrace();
+	        }
+	    }
+
+	    return cita;
 	}
+
 
 	public int buscarCitaByIdGetIndex(String idCita) {
 		int index = -1;
@@ -710,29 +851,105 @@ public class ClinicaMedica implements Serializable {
 	}
 
 	public void eliminarCita(Cita cita) {
-		if (lasCitas.contains(cita)) {
-			lasCitas.remove(cita); 
-		} 
+	    Connection con = null;
+	    PreparedStatement ps = null;
+
+	    try {
+	        Conexion conexion = new Conexion();
+	        con = conexion.getConexion();
+
+	        String sql = "DELETE FROM Cita WHERE codCita = ?";
+	        ps = con.prepareStatement(sql);
+	        ps.setString(1, cita.getCodCita());
+	        ps.executeUpdate();
+
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	    } finally {
+	        try {
+	            if (ps != null) ps.close();
+	            if (con != null) con.close();
+	        } catch (SQLException e) {
+	            e.printStackTrace();
+	        }
+	    }
 	}
+
 
 	public void updateCita(Cita cita) {
-		int index = buscarCitaByIdGetIndex(cita.getIdCita());
-		if(index != -1) {
-			lasCitas.set(index, cita);
-		}
+	    Connection con = null;
+	    PreparedStatement ps = null;
+
+	    try {
+	        Conexion conexion = new Conexion();
+	        con = conexion.getConexion();
+
+	        String sql = "UPDATE Cita SET idPersona = ?, nombre = ?, fecha = ?, hora = ?, motivo = ? WHERE codCita = ?";
+	        ps = con.prepareStatement(sql);
+
+	        ps.setString(1, cita.getIdPersona());
+	        ps.setString(2, cita.getNombre());
+	        ps.setDate(3, new java.sql.Date(cita.getFecha().getTime()));
+	        ps.setTime(4, new java.sql.Time(cita.getHora().getTime()));
+	        ps.setString(5, cita.getMotivo());
+	        ps.setString(6, cita.getCodCita());
+
+	        ps.executeUpdate();
+
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	    } finally {
+	        try {
+	            if (ps != null) ps.close();
+	            if (con != null) con.close();
+	        } catch (SQLException ex) {
+	            ex.printStackTrace();
+	        }
+	    }
 	}
 
-	public boolean existeCita(Date fecha, Date hora, Medico medico) {
-		boolean existe = false;
-		int i = 0;
-		while(!existe && i<lasCitas.size()) {
-			if(lasCitas.get(i).getFecha().equals(fecha) && lasCitas.get(i).getHora().equals(hora) && lasCitas.get(i).getMedico().equals(medico)) {
-				existe = true;
-			}
-			i++;
-		}
-		return existe;
+	public boolean existeCita(Date fecha, Time hora, Medico medico, String codCita) {
+	    boolean existe = false;
+	    Connection con = null;
+	    PreparedStatement ps = null;
+	    ResultSet rs = null;
+
+	    try {
+	        Conexion conexion = new Conexion();
+	        con = conexion.getConexion();
+
+	        String sql = "SELECT COUNT(*) FROM Cita WHERE fecha = ? AND hora = ? AND idPersona = ? AND codCita != ?";
+	        ps = con.prepareStatement(sql);
+	        java.sql.Date sqlFecha = new java.sql.Date(fecha.getTime());
+	        java.sql.Time sqlHora = hora; // Ya es java.sql.Time
+	        
+	        ps.setDate(1, sqlFecha);
+	        ps.setString(2, sqlHora.toString());
+	        ps.setString(3, medico.getIdPersona());
+	        ps.setString(4, codCita);
+
+	        rs = ps.executeQuery();
+	        if (rs.next()) {
+	            int count = rs.getInt(1);
+	            existe = count > 0;
+	        }
+
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	    } finally {
+	        try {
+	            if (rs != null) rs.close();
+	            if (ps != null) ps.close();
+	            if (con != null) con.close();
+	        } catch (SQLException ex) {
+	            ex.printStackTrace();
+	        }
+	    }
+
+	    return existe;
 	}
+
+
 
 	public Vacuna buscarVacunaByCodigo(String codigo) {
 		Vacuna vacuna = null;
@@ -1474,6 +1691,75 @@ public class ClinicaMedica implements Serializable {
 	        if (rs.next()) {
 	            int ultimoNumero = rs.getInt(1);
 	            nuevoCodigo = "C-" + (ultimoNumero + 1);
+	        }
+
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	    } finally {
+	        try {
+	            if (rs != null) rs.close();
+	            if (ps != null) ps.close();
+	            if (conn != null) conn.close();
+	        } catch (SQLException e) {
+	            e.printStackTrace();
+	        }
+	    }
+
+	    return nuevoCodigo;
+	}
+
+	public Especialidad buscarEspecialidadByCodigo(int codigoEspecialidad) {
+	    Especialidad especialidadEncontrada = null;
+	    Connection con = null;
+	    PreparedStatement ps = null;
+	    ResultSet rs = null;
+
+	    try {
+	        Conexion conexion = new Conexion();
+	        con = conexion.getConexion();
+
+	        String sql = "SELECT idEspecialidad, descripcion FROM Especialidad WHERE idEspecialidad = ?";
+	        ps = con.prepareStatement(sql);
+	        ps.setInt(1, codigoEspecialidad);
+	        rs = ps.executeQuery();
+
+	        if (rs.next()) {
+	            int id = rs.getInt("idEspecialidad");
+	            String nombre = rs.getString("descripcion");
+
+	            especialidadEncontrada = new Especialidad(id, nombre);
+	        }
+
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	    } finally {
+	        try {
+	            if (rs != null) rs.close();
+	            if (ps != null) ps.close();
+	            if (con != null) con.close();
+	        } catch (SQLException e) {
+	            e.printStackTrace();
+	        }
+	    }
+
+	    return especialidadEncontrada;
+	}
+
+	public String generarNuevoCodigoCita() {
+		String nuevoCodigo = "CT-1"; // Valor por defecto
+	    Connection conn = null;
+	    PreparedStatement ps = null;
+	    ResultSet rs = null;
+
+	    try {
+	        conn = new Conexion().getConexion();
+	        String sql = "SELECT MAX(CAST(SUBSTRING(codCita, 4, LEN(codCita)) AS INT)) FROM Cita";
+	        ps = conn.prepareStatement(sql);
+	        rs = ps.executeQuery();
+
+	        if (rs.next()) {
+	            int ultimoNumero = rs.getInt(1); // si no hay resultados, será 0
+	            nuevoCodigo = "CT-" + (ultimoNumero + 1);
 	        }
 
 	    } catch (SQLException e) {

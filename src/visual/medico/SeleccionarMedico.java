@@ -71,7 +71,7 @@ public class SeleccionarMedico extends JDialog {
 							if(index >= 0) {
 								btnSeleccionar.setEnabled(true);
 								String codigo = table.getValueAt(index, 0).toString();
-								selected = ClinicaMedica.getInstance().buscarMedicoById(codigo);
+								selected = ClinicaMedica.getInstance().buscarMedicoByIdPersona(codigo);
 							}
 						}
 					});
