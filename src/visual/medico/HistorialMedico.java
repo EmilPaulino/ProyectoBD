@@ -132,7 +132,7 @@ public class HistorialMedico extends JDialog {
 	            row[0] = consulta.getCodConsulta();
 	            row[1] = consulta.getFecha();
 	            row[2] = consulta.getDiagnostico();
-	            Persona persona = ClinicaMedica.getInstance().buscarPersonabyCodigo(consulta.getIdPersona());
+	            Persona persona = ClinicaMedica.getInstance().buscarPersonabyCodigo(consulta.getIdMedico());
 	            row[3] = persona.getNombre() + " " + persona.getApellido();
 	            modelo.addRow(row);
 	        }

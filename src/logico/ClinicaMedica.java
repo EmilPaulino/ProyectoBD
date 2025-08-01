@@ -237,9 +237,45 @@ public class ClinicaMedica implements Serializable {
 		this.losMedicos = losMedicos;
 	}
 
-	public ArrayList<Enfermedad> getLasEnfermedades() {
-		return lasEnfermedades;
+	public ArrayList<Enfermedad> getTodasLasEnfermedades() {
+	    ArrayList<Enfermedad> enfermedades = new ArrayList<>();
+	    Connection con = null;
+	    PreparedStatement ps = null;
+	    ResultSet rs = null;
+
+	    try {
+	        Conexion conexion = new Conexion();
+	        con = conexion.getConexion();
+
+	        String sql = "SELECT idEnfermedad, nombre, sintomas, idTipoEnfermedad FROM Enfermedad";
+	        ps = con.prepareStatement(sql);
+	        rs = ps.executeQuery();
+
+	        while (rs.next()) {
+	            String idEnfermedad = rs.getString("idEnfermedad");
+	            String nombre = rs.getString("nombre");
+	            String sintomas = rs.getString("sintomas");
+	            int idTipo = rs.getInt("idTipoEnfermedad");
+
+	            Enfermedad enfermedad = new Enfermedad(idEnfermedad, nombre, sintomas, idTipo);
+	            enfermedades.add(enfermedad);
+	        }
+
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	    } finally {
+	        try {
+	            if (rs != null) rs.close();
+	            if (ps != null) ps.close();
+	            if (con != null) con.close();
+	        } catch (SQLException e) {
+	            e.printStackTrace();
+	        }
+	    }
+
+	    return enfermedades;
 	}
+
 
 	public void setLasEnfermedades(ArrayList<Enfermedad> lasEnfermedades) {
 		this.lasEnfermedades = lasEnfermedades;
@@ -351,17 +387,85 @@ public class ClinicaMedica implements Serializable {
 	}
 
 	public void insertarConsulta(Consulta consulta) {
-		lasConsultas.add(consulta);
-		codConsulta++;
+		Connection con = null;
+		PreparedStatement ps = null;
+
+		try {
+			Conexion conexion = new Conexion();
+			con = conexion.getConexion();
+
+			String sql = "INSERT INTO Consulta (codConsulta, idPersona, fecha, diagnostico, indicacion, "+
+					     "esImportante, idPaciente) " +
+			             "VALUES (?, ?, ?, ?, ?, ?, ?)";
+
+			ps = con.prepareStatement(sql);
+			ps.setString(1, consulta.getCodConsulta());
+			ps.setString(2, consulta.getIdMedico());
+			ps.setDate(3, new java.sql.Date(consulta.getFecha().getTime()));
+			ps.setString(4, consulta.getDiagnostico());
+			ps.setString(5, consulta.getIndicacion());
+			ps.setBoolean(6, consulta.isEsImportante());
+			ps.setString(7, consulta.getIdPaciente());
+
+			ps.executeUpdate();
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				if (ps != null) ps.close();
+				if (con != null) con.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 
 	public void insertarConsultaEnHistorial(Consulta consulta, Paciente paciente) {
-		paciente.getMiHistorial().getLasConsultas().add(consulta);
+		Connection con = null;
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+
+		try {
+			Conexion conexion = new Conexion();
+			con = conexion.getConexion();
+
+			String idHistorial = null;
+			String sql = "SELECT idHistorialClinico FROM HistorialClinico WHERE idPersona = ?";
+			ps = con.prepareStatement(sql);
+			ps.setString(1, paciente.getIdPersona());
+			rs = ps.executeQuery();
+
+			if (rs.next()) {
+				idHistorial = rs.getString("idHistorialClinico");
+			}
+			rs.close();
+			ps.close();
+
+			sql = "INSERT INTO Historial_Consulta (idHistorial, codConsulta) VALUES (?, ?)";
+			ps = con.prepareStatement(sql);
+			ps.setString(1, idHistorial);
+			ps.setString(2, consulta.getCodConsulta());
+			ps.executeUpdate();
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				if (rs != null) rs.close();
+				if (ps != null) ps.close();
+				if (con != null) con.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
 	}
+
 
 	public Consulta getConsultaById(String codigo) {
 		Consulta consulta = null;
-		String sql = "SELECT codConsulta, idPersona, fecha, diagnostico, indicacion, esImportante FROM Consulta WHERE codConsulta = ?";
+		String sql = "SELECT codConsulta, idPersona, fecha, diagnostico, indicacion, esImportante, idPaciente "
+				+ "FROM Consulta WHERE codConsulta = ?";
 
 		try (Connection conn = new Conexion().getConexion();
 				PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -375,7 +479,8 @@ public class ClinicaMedica implements Serializable {
 							rs.getDate("fecha"),
 							rs.getString("diagnostico"),
 							rs.getString("indicacion"),
-							rs.getBoolean("esImportante")
+							rs.getBoolean("esImportante"),
+							rs.getString("idPaciente")
 							);
 				}
 			}
@@ -696,7 +801,7 @@ public class ClinicaMedica implements Serializable {
 				String idPersona = rs.getString("idPersona");
 
 				Usuario usuarioLogin = new Usuario(idUsuario, usuario, contrasena, idRol, idPersona);
-				loginUsuario = usuarioLogin;
+				setLoginUsuario(usuarioLogin);
 				login = true;
 			}
 
@@ -754,16 +859,41 @@ public class ClinicaMedica implements Serializable {
 
 	public Enfermedad buscarEnfermedadById(String codigo) {
 		Enfermedad enfermedad = null;
-		boolean encontrado = false;
-		int i = 0;
-		while (!encontrado && i < lasEnfermedades.size()) { 
-			if (lasEnfermedades.get(i).getIdEnfermedad().equalsIgnoreCase(codigo)) { 
-				enfermedad = lasEnfermedades.get(i); 
-				encontrado = true; 
-			}
-			i++; 
-		}
-		return enfermedad;
+	    Connection con = null;
+	    PreparedStatement ps = null;
+	    ResultSet rs = null;
+
+	    try {
+	        Conexion conexion = new Conexion();
+	        con = conexion.getConexion();
+
+	        String sql = "SELECT idEnfermedad, nombre, sintomas, idTipoEnfermedad FROM Enfermedad WHERE idEnfermedad = ?";
+	        ps = con.prepareStatement(sql);
+	        ps.setString(1, codigo);
+	        rs = ps.executeQuery();
+
+	        if (rs.next()) {
+	            String id = rs.getString("idEnfermedad");
+	            String nombre = rs.getString("nombre");
+	            String sintomas = rs.getString("sintomas");
+	            int idTipo = rs.getInt("idTipoEnfermedad");
+
+	            enfermedad = new Enfermedad(id, nombre, sintomas, idTipo);
+	        }
+
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	    } finally {
+	        try {
+	            if (rs != null) rs.close();
+	            if (ps != null) ps.close();
+	            if (con != null) con.close();
+	        } catch (SQLException e) {
+	            e.printStackTrace();
+	        }
+	    }
+
+	    return enfermedad;
 	}
 
 	public EnfermedadPaciente buscarEnfermedadPacienteByCodigo(String idPaciente, String codigoEnfermedad) {
@@ -884,7 +1014,7 @@ public class ClinicaMedica implements Serializable {
 		Medico medico = null;
 		String sql = "SELECT m.idPersona, m.exequatur, m.idEspecialidad, " +
 				"p.nombre, p.apellido, p.cedula, p.telefono, p.direccion, "
-				+ "p.fechaNacimiento, p.sexo" +
+				+ "p.fechaNacimiento, p.sexo " +
 				"FROM Medico m " +
 				"JOIN Persona p ON m.idPersona = p.idPersona " +
 				"WHERE m.idPersona = ?";
@@ -1141,7 +1271,7 @@ public class ClinicaMedica implements Serializable {
 		try {
 			Connection conn = new Conexion().getConexion();
 
-			String sql = "SELECT c.codConsulta, c.idPersona, c.fecha, c.diagnostico, c.indicacion, c.esImportante " + 
+			String sql = "SELECT c.codConsulta, c.idPersona, c.fecha, c.diagnostico, c.indicacion, c.esImportante, c.idPaciente " + 
 					"FROM HistorialClinico hc " + 
 					"INNER JOIN Historial_Consulta hcon ON hc.idHistorialClinico = hcon.idHistorial " + 
 					"INNER JOIN Consulta c ON hcon.codConsulta = c.codConsulta " + 
@@ -1158,7 +1288,8 @@ public class ClinicaMedica implements Serializable {
 						rs.getDate("fecha"),
 						rs.getString("diagnostico"),
 						rs.getString("indicacion"),
-						rs.getBoolean("esImportante")
+						rs.getBoolean("esImportante"),
+						rs.getString("idPaciente")
 						);
 				consultas.add(consulta);
 			}
@@ -1283,4 +1414,81 @@ public class ClinicaMedica implements Serializable {
 	        }
 	    }
 	}
+	
+	public void insertarEnfermedadDePacientePorIdPaciente(String idPaciente, String idEnfermedad) {
+	    Connection con = null;
+	    PreparedStatement psSelect = null;
+	    PreparedStatement psInsert = null;
+	    ResultSet rs = null;
+
+	    try {
+	        Conexion conexion = new Conexion();
+	        con = conexion.getConexion();
+
+	        // Paso 1: Buscar idHistorial
+	        String sqlSelect = "SELECT idHistorialClinico FROM HistorialClinico WHERE idPersona = ?";
+	        psSelect = con.prepareStatement(sqlSelect);
+	        psSelect.setString(1, idPaciente);
+	        rs = psSelect.executeQuery();
+
+	        if (rs.next()) {
+	            String idHistorial = rs.getString("idHistorialClinico");
+
+	            // Paso 2: Insertar en Historial_Enfermedad
+	            String sqlInsert = "INSERT INTO Historial_Enfermedad (idHistorialClinico, idEnfermedad) VALUES (?, ?)";
+	            psInsert = con.prepareStatement(sqlInsert);
+	            psInsert.setString(1, idHistorial);
+	            psInsert.setString(2, idEnfermedad);
+
+	            psInsert.executeUpdate();
+	        } else {
+	            System.out.println("No se encontró historial clínico para el paciente con id: " + idPaciente);
+	        }
+
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	    } finally {
+	        try {
+	            if (rs != null) rs.close();
+	            if (psSelect != null) psSelect.close();
+	            if (psInsert != null) psInsert.close();
+	            if (con != null) con.close();
+	        } catch (SQLException ex) {
+	            ex.printStackTrace();
+	        }
+	    }
+	}
+
+	public String generarNuevoCodigoConsulta() {
+		String nuevoCodigo = "C-1"; // Valor por defecto
+	    Connection conn = null;
+	    PreparedStatement ps = null;
+	    ResultSet rs = null;
+
+	    try {
+	        conn = new Conexion().getConexion();
+	        String sql = "SELECT MAX(CAST(SUBSTRING(codConsulta, 3, LEN(codConsulta)) AS INT)) FROM Consulta";
+	        ps = conn.prepareStatement(sql);
+	        rs = ps.executeQuery();
+
+	        if (rs.next()) {
+	            int ultimoNumero = rs.getInt(1);
+	            nuevoCodigo = "C-" + (ultimoNumero + 1);
+	        }
+
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	    } finally {
+	        try {
+	            if (rs != null) rs.close();
+	            if (ps != null) ps.close();
+	            if (conn != null) conn.close();
+	        } catch (SQLException e) {
+	            e.printStackTrace();
+	        }
+	    }
+
+	    return nuevoCodigo;
+	}
+
 }

@@ -74,7 +74,7 @@ public class SeleccionarPaciente extends JDialog {
 						}
 					});
 					modelo = new DefaultTableModel();
-					String[] identificadores = {"Cédula", "Nombre", "Apellido", "Teléfono"};
+					String[] identificadores = {"ID Persona", "Nombre", "Apellido", "Teléfono"};
 					modelo.setColumnIdentifiers(identificadores);
 					table.setModel(modelo);
 					scrollPane.setViewportView(table);
@@ -117,7 +117,7 @@ public class SeleccionarPaciente extends JDialog {
 		ArrayList<Paciente> pac = ClinicaMedica.getInstance().getLosPacientes();
 		row = new Object[table.getColumnCount()];
 		for(Paciente paciente:pac) {
-			row[0] = paciente.getCedula();
+			row[0] = paciente.getIdPersona();
 	        row[1] = paciente.getNombre();
 	        row[2] = paciente.getApellido();
 	        row[3] = paciente.getTelefono();

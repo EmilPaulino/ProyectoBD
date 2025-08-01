@@ -71,8 +71,9 @@ public class RegistroConsulta extends JDialog {
 	 */
 	public RegistroConsulta(Consulta aux) {
 		
-		if(ClinicaMedica.getLoginUsuario().getRol().equals("Médico")) {
-			medico = ClinicaMedica.getLoginUsuario().getMedicoRelacionado();
+		if(ClinicaMedica.getLoginUsuario().getIdRol() == 2) {
+			String m = ClinicaMedica.getLoginUsuario().getIdPersona();
+			 medico = ClinicaMedica.getInstance().buscarMedicoByIdPersona(m);
 		}
 		
 		updated = aux;
@@ -104,7 +105,7 @@ public class RegistroConsulta extends JDialog {
 				panel_1.add(txtMedico);
 				txtMedico.setEditable(false);
 				txtMedico.setColumns(10);
-				if(ClinicaMedica.getLoginUsuario().getRol().equals("Médico")) {
+				if(ClinicaMedica.getLoginUsuario().getIdRol() == 2) {
 					txtMedico.setText(medico.getNombre()+" "+medico.getApellido());
 				}
 
@@ -123,7 +124,7 @@ public class RegistroConsulta extends JDialog {
 			}
 			{
 				txtCodConsulta = new JTextField();
-				txtCodConsulta.setText("Cons-"+ClinicaMedica.getInstance().codConsulta);
+				txtCodConsulta.setText(ClinicaMedica.getInstance().generarNuevoCodigoConsulta());
 				txtCodConsulta.setBounds(66, 14, 182, 20);
 				panel_2.add(txtCodConsulta);
 				txtCodConsulta.setEditable(false);
@@ -270,13 +271,22 @@ public class RegistroConsulta extends JDialog {
 						if(camposVacios()) {
 				            JOptionPane.showMessageDialog(null, "Todos los campos son obligatorios", "Información", JOptionPane.ERROR_MESSAGE);
 						}else {
-							Consulta consulta = new Consulta(txtCodConsulta.getText(), medico, paciente, txtDiagnostico.getText(), txtAIndicacion.getText(), chckbxImportante.isSelected());
+							Consulta consulta = new Consulta(
+								    txtCodConsulta.getText(),
+								    medico.getIdPersona(),
+								    (Date) spnFecha.getValue(),
+								    txtDiagnostico.getText(),
+								    txtAIndicacion.getText(),
+								    chckbxImportante.isSelected(),
+								    paciente.getIdPersona()
+								);
+
 							ClinicaMedica.getInstance().insertarConsulta(consulta);
 							if(chckbxImportante.isSelected()) {
-								paciente.getMiHistorial().getLasConsultas().add(consulta);
+								ClinicaMedica.getInstance().insertarConsultaEnHistorial(consulta, paciente);
 							}
 							if(enfermedad!=null) {
-								paciente.getMisEnfermedades().add(enfermedad);
+								ClinicaMedica.getInstance().insertarEnfermedadDePacientePorIdPaciente(paciente.getIdPersona(), enfermedad.getIdEnfermedad());
 							}
 							JOptionPane.showMessageDialog(null, "Operacion Satisfactoria", "Informacion", JOptionPane.INFORMATION_MESSAGE);
 							dispose();
@@ -303,10 +313,14 @@ public class RegistroConsulta extends JDialog {
 	}
 	private void loadConsulta(){
 		if(updated != null) {
-			txtCodConsulta.setText(updated.getIdConsulta());
+			txtCodConsulta.setText(updated.getCodConsulta());
 			spnFecha.setValue(updated.getFecha());
-			txtMedico.setText(updated.getMedico().getNombre()+" "+updated.getMedico().getApellido());
-			txtPaciente.setText(updated.getPaciente().getNombre()+" "+updated.getPaciente().getApellido());
+			String nombreM = ClinicaMedica.getInstance().buscarMedicoByIdPersona(updated.getIdMedico()).getNombre();
+			String apellidoM = ClinicaMedica.getInstance().buscarMedicoByIdPersona(updated.getIdMedico()).getApellido();
+			txtMedico.setText(nombreM+' '+apellidoM);
+			String nombreP = ClinicaMedica.getInstance().buscarPacienteByIdPersona(updated.getIdPaciente()).getNombre();
+			String apellidoP = ClinicaMedica.getInstance().buscarPacienteByIdPersona(updated.getIdPaciente()).getApellido();
+			txtPaciente.setText(nombreP+' '+apellidoP);
 			btnAmpliarDatos.setEnabled(false);
 			btnSeleccionarPaciente.setEnabled(false);
 			txtDiagnostico.setText(updated.getDiagnostico());
@@ -314,7 +328,7 @@ public class RegistroConsulta extends JDialog {
 			txtAIndicacion.setText(updated.getIndicacion());
 			txtAIndicacion.setEditable(false);
 			txtAIndicacion.setEnabled(false);
-			if(updated.isImportante()) {
+			if(updated.isEsImportante()) {
 				chckbxImportante.setSelected(true);
 			}
 			else {
@@ -322,7 +336,6 @@ public class RegistroConsulta extends JDialog {
 			}
 			chckbxImportante.setEnabled(false);
 			btnRegistrar.setEnabled(false);
-			txtEnfermedad.setText(updated.getMedico().getNombre()+" "+updated.getMedico().getApellido());
 			btnSeleccionarEnfermedad.setEnabled(false);
 		}
 	}

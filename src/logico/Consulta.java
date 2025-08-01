@@ -11,21 +11,23 @@ public class Consulta implements Serializable{
 	private static final long serialVersionUID = 1L;
 	
 	private String codConsulta;
-	private String idPersona;
+	private String idMedico;
 	private Date fecha;
 	private String diagnostico;
 	private String indicacion;
 	private boolean esImportante;
+	private String idPaciente;
 	
-	public Consulta(String codConsulta, String idPersona, Date fecha, String diagnostico, String indicacion,
-			boolean esImportante) {
+	public Consulta(String codConsulta, String idMedico, Date fecha, String diagnostico, String indicacion,
+			boolean esImportante, String idPaciente) {
 		super();
 		this.codConsulta = codConsulta;
-		this.idPersona = idPersona;
+		this.idMedico = idMedico;
 		this.fecha = fecha;
 		this.diagnostico = diagnostico;
 		this.indicacion = indicacion;
 		this.esImportante = esImportante;
+		this.idPaciente = idPaciente;
 	}
 
 	public String getCodConsulta() {
@@ -36,12 +38,12 @@ public class Consulta implements Serializable{
 		this.codConsulta = codConsulta;
 	}
 
-	public String getIdPersona() {
-		return idPersona;
+	public String getIdMedico() {
+		return idMedico;
 	}
 
-	public void setIdPersona(String idPersona) {
-		this.idPersona = idPersona;
+	public void setIdMedico(String idMedico) {
+		this.idMedico = idMedico;
 	}
 
 	public Date getFecha() {
@@ -74,6 +76,14 @@ public class Consulta implements Serializable{
 
 	public void setEsImportante(boolean esImportante) {
 		this.esImportante = esImportante;
+	}
+
+	public String getIdPaciente() {
+		return idPaciente;
+	}
+
+	public void setIdPaciente(String idPaciente) {
+		this.idPaciente = idPaciente;
 	}
 	
 }
