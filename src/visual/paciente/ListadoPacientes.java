@@ -128,8 +128,8 @@ public class ListadoPacientes extends JDialog {
 				btnCancelar.setActionCommand("Cancel");
 				buttonPane.add(btnCancelar);
 			}
-			loadPacientes();
 		}
+		loadPacientes();
 	}
 	public static void loadPacientes() {
 		modelo.setRowCount(0);
