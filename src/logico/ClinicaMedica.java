@@ -430,8 +430,49 @@ public class ClinicaMedica implements Serializable {
 	}
 
 	public void insertarMedico(Medico medico) {
-		losMedicos.add(medico);
-		codMedico++;
+	    Connection con = null;
+	    PreparedStatement psPersona = null;
+	    PreparedStatement psMedico = null;
+
+	    try {
+	        Conexion conexion = new Conexion();
+	        con = conexion.getConexion();
+
+	        // Insertar en tabla Persona
+	        String sqlPersona = "INSERT INTO Persona (idPersona, cedula, nombre, apellido, telefono, direccion, fechaNacimiento, sexo) " +
+	                            "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+	        psPersona = con.prepareStatement(sqlPersona);
+	        psPersona.setString(1, medico.getIdPersona());
+	        psPersona.setString(2, medico.getCedula());
+	        psPersona.setString(3, medico.getNombre());
+	        psPersona.setString(4, medico.getApellido());
+	        psPersona.setString(5, medico.getTelefono());
+	        psPersona.setString(6, medico.getDireccion());
+	        psPersona.setDate(7, new java.sql.Date(medico.getFechaNacimiento().getTime()));
+	        psPersona.setString(8, String.valueOf(medico.getSexo()));
+
+	        psPersona.executeUpdate();
+
+	        // Insertar en tabla Medico
+	        String sqlMedico = "INSERT INTO Medico (idPersona, idEspecialidad, exequatur) VALUES (?, ?, ?)";
+	        psMedico = con.prepareStatement(sqlMedico);
+	        psMedico.setString(1, medico.getIdPersona());
+	        psMedico.setInt(2, medico.getEspecialidad());
+	        psMedico.setInt(3, medico.getExequatur());
+
+	        psMedico.executeUpdate();
+
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	    } finally {
+	        try {
+	            if (psPersona != null) psPersona.close();
+	            if (psMedico != null) psMedico.close();
+	            if (con != null) con.close();
+	        } catch (SQLException e) {
+	            e.printStackTrace();
+	        }
+	    }
 	}
 
 	public void insertarEnfermedad(Enfermedad enfermedad) {
