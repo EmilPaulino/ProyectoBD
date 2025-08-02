@@ -6,6 +6,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -228,6 +229,24 @@ public class ClinicaMedica implements Serializable {
 
 	public void setLosPacientes(ArrayList<Paciente> losPacientes) {
 		this.losPacientes = losPacientes;
+	}
+	
+	public static int calcularEdad(Date fechaNacimiento) {
+	    if (fechaNacimiento == null) return 0;
+
+	    Calendar nacimiento = Calendar.getInstance();
+	    nacimiento.setTime(fechaNacimiento);
+
+	    Calendar hoy = Calendar.getInstance();
+
+	    int edad = hoy.get(Calendar.YEAR) - nacimiento.get(Calendar.YEAR);
+
+	    // Verifica si aún no ha cumplido años en este año
+	    if (hoy.get(Calendar.DAY_OF_YEAR) < nacimiento.get(Calendar.DAY_OF_YEAR)) {
+	        edad--;
+	    }
+
+	    return edad;
 	}
 
 	public ArrayList<Medico> getLosMedicos() {
