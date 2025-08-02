@@ -231,7 +231,51 @@ public class ClinicaMedica implements Serializable {
 	}
 
 	public ArrayList<Medico> getLosMedicos() {
-		return losMedicos;
+	    ArrayList<Medico> medicos = new ArrayList<>();
+	    Connection conn = null;
+	    PreparedStatement ps = null;
+	    ResultSet rs = null;
+
+	    try {
+	        conn = new Conexion().getConexion();
+	        String sql = "SELECT p.idPersona, p.cedula, p.nombre, p.apellido, p.telefono, p.direccion, " +
+	                     "p.fechaNacimiento, p.sexo, m.idEspecialidad, m.exequatur " +
+	                     "FROM Persona p " +
+	                     "JOIN Medico m ON p.idPersona = m.idPersona";
+
+	        ps = conn.prepareStatement(sql);
+	        rs = ps.executeQuery();
+
+	        while (rs.next()) {
+	            String idPersona = rs.getString("idPersona");
+	            String cedula = rs.getString("cedula");
+	            String nombre = rs.getString("nombre");
+	            String apellido = rs.getString("apellido");
+	            String telefono = rs.getString("telefono");
+	            String direccion = rs.getString("direccion");
+	            Date fechaNacimiento = rs.getDate("fechaNacimiento");
+	            char sexo = rs.getString("sexo").charAt(0);
+	            int idEspecialidad = rs.getInt("idEspecialidad");
+	            int exequatur = rs.getInt("exequatur");
+
+	            Medico medico = new Medico(idPersona, cedula, nombre, apellido, telefono, direccion,
+	                                       fechaNacimiento, sexo, idEspecialidad, exequatur);
+	            medicos.add(medico);
+	        }
+
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	    } finally {
+	        try {
+	            if (rs != null) rs.close();
+	            if (ps != null) ps.close();
+	            if (conn != null) conn.close();
+	        } catch (SQLException e) {
+	            e.printStackTrace();
+	        }
+	    }
+
+	    return medicos;
 	}
 
 	public void setLosMedicos(ArrayList<Medico> losMedicos) {
@@ -1130,6 +1174,8 @@ public class ClinicaMedica implements Serializable {
 		}
 		return roles;
 	}
+	
+	
 
 	public Medico buscarMedicoByIdPersona(String idPersona) {
 		Medico medico = null;
