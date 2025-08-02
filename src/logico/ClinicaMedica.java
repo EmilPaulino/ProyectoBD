@@ -435,8 +435,34 @@ public class ClinicaMedica implements Serializable {
 	}
 
 	public void insertarEnfermedad(Enfermedad enfermedad) {
-		lasEnfermedades.add(enfermedad);
-		codEnfermedad++;
+		Connection con = null;
+		PreparedStatement ps = null;
+
+		try {
+			Conexion conexion = new Conexion();
+			con = conexion.getConexion();
+
+			String sql = "INSERT INTO Enfermedad (idEnfermedad, nombre, sintomas, idTipoEnfermedad) " +
+			             "VALUES (?, ?, ?, ?)";
+
+			ps = con.prepareStatement(sql);
+			ps.setString(1, enfermedad.getIdEnfermedad());
+			ps.setString(2, enfermedad.getNombre());
+			ps.setString(3, enfermedad.getSintomas());
+			ps.setInt(4, enfermedad.getIdTipoEnfermedad());
+
+			ps.executeUpdate();
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				if (ps != null) ps.close();
+				if (con != null) con.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 
 	public void insertarVacuna (Vacuna vacuna) {
@@ -1133,6 +1159,47 @@ public class ClinicaMedica implements Serializable {
 	    }
 
 	    return enfermedad;
+	}
+	
+	public ArrayList<Paciente> getPacientesPorEnfermedad(String idEnfermedad) {
+	    ArrayList<Paciente> pacientes = new ArrayList<>();
+
+	    String query = "SELECT DISTINCT p.idPersona, p.cedula, p.nombre, p.apellido, p.telefono, " +
+	                   "p.direccion, p.fechaNacimiento, p.sexo, p.estatura, p.peso " +
+	                   "FROM Paciente p " +
+	                   "JOIN HistorialClinico hc ON p.idPersona = hc.idPersona " +
+	                   "JOIN Historial_Enfermedad he ON hc.idHistorialClinico = he.idHistorialClinico " +
+	                   "WHERE he.idEnfermedad = ?";
+
+	    try (Connection conn = new Conexion().getConexion();
+	         PreparedStatement ps = conn.prepareStatement(query)) {
+
+	        ps.setString(1, idEnfermedad);
+	        ResultSet rs = ps.executeQuery();
+
+	        while (rs.next()) {
+	            String idPersona = rs.getString("idPersona");
+	            String cedula = rs.getString("cedula");
+	            String nombre = rs.getString("nombre");
+	            String apellido = rs.getString("apellido");
+	            String telefono = rs.getString("telefono");
+	            String direccion = rs.getString("direccion");
+	            Date fechaNacimiento = rs.getDate("fechaNacimiento");
+	            char sexo = rs.getString("sexo").charAt(0);
+	            float estatura = rs.getFloat("estatura");
+	            float peso = rs.getFloat("peso");
+
+	            Paciente paciente = new Paciente(idPersona, cedula, nombre, apellido, telefono,
+	                                             direccion, fechaNacimiento, sexo, estatura, peso);
+	            pacientes.add(paciente);
+	        }
+
+	        rs.close();
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	    }
+
+	    return pacientes;
 	}
 
 	public EnfermedadPaciente buscarEnfermedadPacienteByCodigo(String idPaciente, String codigoEnfermedad) {
