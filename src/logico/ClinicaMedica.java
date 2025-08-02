@@ -380,6 +380,38 @@ public class ClinicaMedica implements Serializable {
 			}
 		}
 	}
+	
+	public String generarNuevoCodigoEnfermedad() {
+	    String nuevoCodigo = "E-1"; // Valor por defecto
+	    Connection conn = null;
+	    PreparedStatement ps = null;
+	    ResultSet rs = null;
+
+	    try {
+	        conn = new Conexion().getConexion();
+	        String sql = "SELECT MAX(CAST(SUBSTRING(idEnfermedad, 3, LEN(idEnfermedad)) AS INT)) FROM Enfermedad";
+	        ps = conn.prepareStatement(sql);
+	        rs = ps.executeQuery();
+
+	        if (rs.next()) {
+	            int ultimoNumero = rs.getInt(1);
+	            nuevoCodigo = "E-" + (ultimoNumero + 1);
+	        }
+
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	    } finally {
+	        try {
+	            if (rs != null) rs.close();
+	            if (ps != null) ps.close();
+	            if (conn != null) conn.close();
+	        } catch (SQLException e) {
+	            e.printStackTrace();
+	        }
+	    }
+
+	    return nuevoCodigo;
+	}
 
 	public void insertarVacuna (Vacuna vacuna) {
 		lasVacunas.add(vacuna);
@@ -1457,6 +1489,27 @@ public class ClinicaMedica implements Serializable {
 			e.printStackTrace();
 			return 0; 
 		}
+	}
+	
+	public ArrayList<TipoEnfermedad> getTiposEnfermedades() {
+		ArrayList<TipoEnfermedad> tipos = new ArrayList<>();
+		String sql = "SELECT idTipoEnfermedad, nombreTipo FROM TipoEnfermedad";
+
+		try (Connection conn = new Conexion().getConexion();
+			 PreparedStatement ps = conn.prepareStatement(sql);
+			 ResultSet rs = ps.executeQuery()) {
+
+			while (rs.next()) {
+				int id = rs.getInt("idTipoEnfermedad");
+				String nombre = rs.getString("nombreTipo");
+
+				TipoEnfermedad tipo = new TipoEnfermedad(id, nombre);
+				tipos.add(tipo);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return tipos;
 	}
 
 	public String getTipoEnfermedadByIdEnfermedad(int idTipoEnfermedad) {
