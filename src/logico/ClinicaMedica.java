@@ -1179,8 +1179,9 @@ public class ClinicaMedica implements Serializable {
 	    ArrayList<Paciente> pacientes = new ArrayList<>();
 
 	    String query = "SELECT DISTINCT p.idPersona, p.cedula, p.nombre, p.apellido, p.telefono, " +
-	                   "p.direccion, p.fechaNacimiento, p.sexo, p.estatura, p.peso " +
-	                   "FROM Paciente p " +
+	                   "p.direccion, p.fechaNacimiento, p.sexo, pac.estatura, pac.peso " +
+	                   "FROM Persona p "+
+	                   "JOIN Paciente pac ON p.idPersona = pac.idPersona " +
 	                   "JOIN HistorialClinico hc ON p.idPersona = hc.idPersona " +
 	                   "JOIN Historial_Enfermedad he ON hc.idHistorialClinico = he.idHistorialClinico " +
 	                   "WHERE he.idEnfermedad = ?";

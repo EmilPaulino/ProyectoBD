@@ -45,7 +45,7 @@ public class DetalleControlEnfermedades extends JDialog {
 	 * Create the dialog.
 	 */
 	public DetalleControlEnfermedades(Enfermedad enf) {
-		setTitle("Listado de paciented diagnosticados con "+enf.getNombre());
+		setTitle("Listado de pacientes diagnosticados con "+enf.getNombre());
 		enfermedad = enf;
 		setBounds(100, 100, 604, 377);
 		getContentPane().setLayout(new BorderLayout());
