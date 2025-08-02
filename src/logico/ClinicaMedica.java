@@ -917,6 +917,47 @@ public class ClinicaMedica implements Serializable {
 
 	    return enfermedad;
 	}
+	
+	public ArrayList<Paciente> getPacientesPorEnfermedad(String idEnfermedad) {
+	    ArrayList<Paciente> pacientes = new ArrayList<>();
+
+	    String query = "SELECT DISTINCT p.idPersona, p.cedula, p.nombre, p.apellido, p.telefono, " +
+	                   "p.direccion, p.fechaNacimiento, p.sexo, p.estatura, p.peso " +
+	                   "FROM Paciente p " +
+	                   "JOIN HistorialClinico hc ON p.idPersona = hc.idPersona " +
+	                   "JOIN Historial_Enfermedad he ON hc.idHistorialClinico = he.idHistorialClinico " +
+	                   "WHERE he.idEnfermedad = ?";
+
+	    try (Connection conn = new Conexion().getConexion();
+	         PreparedStatement ps = conn.prepareStatement(query)) {
+
+	        ps.setString(1, idEnfermedad);
+	        ResultSet rs = ps.executeQuery();
+
+	        while (rs.next()) {
+	            String idPersona = rs.getString("idPersona");
+	            String cedula = rs.getString("cedula");
+	            String nombre = rs.getString("nombre");
+	            String apellido = rs.getString("apellido");
+	            String telefono = rs.getString("telefono");
+	            String direccion = rs.getString("direccion");
+	            Date fechaNacimiento = rs.getDate("fechaNacimiento");
+	            char sexo = rs.getString("sexo").charAt(0);
+	            float estatura = rs.getFloat("estatura");
+	            float peso = rs.getFloat("peso");
+
+	            Paciente paciente = new Paciente(idPersona, cedula, nombre, apellido, telefono,
+	                                             direccion, fechaNacimiento, sexo, estatura, peso);
+	            pacientes.add(paciente);
+	        }
+
+	        rs.close();
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	    }
+
+	    return pacientes;
+	}
 
 	public EnfermedadPaciente buscarEnfermedadPacienteByCodigo(String idPaciente, String codigoEnfermedad) {
 		EnfermedadPaciente enfermedadPaciente = null;

@@ -11,6 +11,7 @@ import javax.swing.border.EmptyBorder;
 import logico.ClinicaMedica;
 import logico.Enfermedad;
 import logico.Paciente;
+import logico.EnfermedadPaciente;
 
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
@@ -87,19 +88,19 @@ public class DetalleControlEnfermedades extends JDialog {
 		}
 		loadPacientes();
 	}
-	private void loadPacientes() {
-		modelo.setRowCount(0);
-		ArrayList<Paciente> pac = ClinicaMedica.getInstance().getLosPacientes();
-		row = new Object[table.getColumnCount()];
-		for(Paciente paciente:pac) {
-			if(paciente.getMisEnfermedades().contains(enfermedad)) {
-				row[0] = paciente.getCedula();
-		        row[1] = paciente.getNombre();
-		        row[2] = paciente.getApellido();
-		        row[3] = paciente.getTelefono();
-		        modelo.addRow(row);
-			}
-		}
-	}
 
+	private void loadPacientes() {
+	    modelo.setRowCount(0);
+	    row = new Object[table.getColumnCount()];
+
+	    ArrayList<Paciente> pacientes = ClinicaMedica.getInstance().getPacientesPorEnfermedad(enfermedad.getIdEnfermedad());
+
+	    for (Paciente paciente : pacientes) {
+	        row[0] = paciente.getCedula();
+	        row[1] = paciente.getNombre();
+	        row[2] = paciente.getApellido();
+	        row[3] = paciente.getTelefono();
+	        modelo.addRow(row);
+	    }
+	}
 }
