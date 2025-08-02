@@ -8,12 +8,13 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.swing.JOptionPane;
 
 import conexionsql.Conexion;
-import visual.usuario.Personal;
+
 
 public class ClinicaMedica implements Serializable {
 
@@ -772,16 +773,37 @@ public class ClinicaMedica implements Serializable {
 		return false; 
 	}
 
-	/*public int getCantPacientesPoseenEnfermedad(Enfermedad enfermedad) {
-		int cant = 0;
-		for(Paciente paciente:losPacientes) {
-			if(paciente.getMisEnfermedades().contains(enfermedad)) {
-				cant++;
-			}
-		}
-		return cant;
-	}*/
+	public int getCantPacientesPoseenEnfermedad(Enfermedad enfermedad) {
+	    int cantidad = 0;
 
+	    try  {
+	        Conexion miConexion = new Conexion();  // Usa tu clase personalizada
+	        Connection conn = miConexion.getConexion();
+
+	        String query = "SELECT COUNT(DISTINCT hc.idPersona) AS cantidad " +
+	                       "FROM HistorialClinico hc " +
+	                       "INNER JOIN Historial_Enfermedad he ON hc.idHistorialClinico = he.idHistorialClinico " +
+	                       "WHERE he.idEnfermedad = ?";
+
+	        PreparedStatement ps = conn.prepareStatement(query);
+	        ps.setString(1, enfermedad.getIdEnfermedad());
+
+	        ResultSet rs = ps.executeQuery();
+	        if (rs.next()) {
+	            cantidad = rs.getInt("cantidad");
+
+	        }
+
+	        rs.close();
+	        ps.close();
+
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	    }
+
+	    return cantidad;
+	}
+	
 	public boolean confirmarLogin(String usuario, String contrasena) {
 		boolean login = false;
 

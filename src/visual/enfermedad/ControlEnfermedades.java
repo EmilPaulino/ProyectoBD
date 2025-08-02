@@ -82,7 +82,7 @@ public class ControlEnfermedades extends JDialog {
 					scrollPane.setViewportView(table);
 				}
 			}
-		}
+//		}
 		{
 			JPanel buttonPane = new JPanel();
 			buttonPane.setBorder(new TitledBorder(null, "", TitledBorder.LEADING, TitledBorder.TOP, null, null));
@@ -117,15 +117,16 @@ public class ControlEnfermedades extends JDialog {
 			}
 		}
 		loadEnfermedades();
-	}
+	}}
 	private void loadEnfermedades() {
 		modelo.setRowCount(0);
-		ArrayList<Enfermedad> enf = ClinicaMedica.getInstance().getLasEnfermedades();
+		ArrayList<Enfermedad> enf = ClinicaMedica.getInstance().getTodasLasEnfermedades();
 		row = new Object[table.getColumnCount()];
 		for(Enfermedad enfermedad : enf) {
 			row[0] = enfermedad.getIdEnfermedad();
 			row[1] = enfermedad.getNombre();
-			row[2] = enfermedad.getTipo();
+			String tipo = ClinicaMedica.getInstance().getTipoEnfermedadByIdEnfermedad(enfermedad.getIdTipoEnfermedad());
+			row[2] = tipo;
 			row[3] = ClinicaMedica.getInstance().getCantPacientesPoseenEnfermedad(enfermedad);
 			modelo.addRow(row);
 		}
