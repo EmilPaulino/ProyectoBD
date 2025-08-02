@@ -276,6 +276,7 @@ public class DetallePaciente extends JDialog {
 		}
 		loadPaciente();
 	}
+	
 	private void loadPaciente() {
 		if(selected != null) {
 			txtCodigo.setText(selected.getIdPersona());
@@ -285,7 +286,8 @@ public class DetallePaciente extends JDialog {
 			txtTelefono.setText(selected.getTelefono());
 			txtDireccion.setText(selected.getDireccion());
 			spnFechaNacim.setValue(selected.getFechaNacimiento());
-			spnEdad.setValue(calcularEdad(selected.getFechaNacimiento()));
+			
+			spnEdad.setValue(ClinicaMedica.calcularEdad(selected.getFechaNacimiento()));
 			char sexo = selected.getSexo();
 			if (sexo == 'M') {
 			    txtSexo.setText("Masculino");
@@ -297,23 +299,5 @@ public class DetallePaciente extends JDialog {
 			spnEstatura.setValue(selected.getEstatura());
 			spnPeso.setValue(selected.getPeso());
 		}
-	}
-	
-	private int calcularEdad(Date fechaNacimiento) {
-	    if (fechaNacimiento == null) return 0;
-
-	    Calendar nacimiento = Calendar.getInstance();
-	    nacimiento.setTime(fechaNacimiento);
-
-	    Calendar hoy = Calendar.getInstance();
-
-	    int edad = hoy.get(Calendar.YEAR) - nacimiento.get(Calendar.YEAR);
-
-	    // Verifica si aún no ha cumplido años en este año
-	    if (hoy.get(Calendar.DAY_OF_YEAR) < nacimiento.get(Calendar.DAY_OF_YEAR)) {
-	        edad--;
-	    }
-
-	    return edad;
 	}
 }
