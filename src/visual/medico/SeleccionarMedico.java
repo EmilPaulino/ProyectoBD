@@ -115,6 +115,7 @@ public class SeleccionarMedico extends JDialog {
 		}
 		loadMedicos();
 	}
+	
 	private void loadMedicos() {
 		modelo.setRowCount(0);
 		ArrayList<Medico> selected = ClinicaMedica.getInstance().getLosMedicos();
@@ -123,7 +124,8 @@ public class SeleccionarMedico extends JDialog {
 			row[0] = medico.getIdPersona();
 			row[1] = medico.getNombre();
 			row[2] = medico.getApellido();
-			row[3] = medico.getEspecialidad();
+			String especialidad = ClinicaMedica.getInstance().getEspecialidadByIdEspecialidad(medico.getEspecialidad());
+			row[3] = especialidad;
 			modelo.addRow(row);
 		}
 	}
