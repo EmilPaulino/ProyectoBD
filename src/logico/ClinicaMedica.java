@@ -351,8 +351,34 @@ public class ClinicaMedica implements Serializable {
 	}
 
 	public void insertarEnfermedad(Enfermedad enfermedad) {
-		lasEnfermedades.add(enfermedad);
-		codEnfermedad++;
+		Connection con = null;
+		PreparedStatement ps = null;
+
+		try {
+			Conexion conexion = new Conexion();
+			con = conexion.getConexion();
+
+			String sql = "INSERT INTO Enfermedad (idEnfermedad, nombre, sintomas, idTipoEnfermedad) " +
+			             "VALUES (?, ?, ?, ?)";
+
+			ps = con.prepareStatement(sql);
+			ps.setString(1, enfermedad.getIdEnfermedad());
+			ps.setString(2, enfermedad.getNombre());
+			ps.setString(3, enfermedad.getSintomas());
+			ps.setInt(4, enfermedad.getIdTipoEnfermedad());
+
+			ps.executeUpdate();
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				if (ps != null) ps.close();
+				if (con != null) con.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 
 	public void insertarVacuna (Vacuna vacuna) {
