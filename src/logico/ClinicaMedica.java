@@ -277,6 +277,27 @@ public class ClinicaMedica implements Serializable {
 
 	    return medicos;
 	}
+	
+	public String getEspecialidadByIdEspecialidad(int idEspecialidad) {
+	    String descripcion = null;
+	    String sql = "SELECT descripcion FROM Especialidad WHERE idEspecialidad = ?";
+
+	    try (Connection conn = new Conexion().getConexion();
+	         PreparedStatement ps = conn.prepareStatement(sql)) {
+
+	        ps.setInt(1, idEspecialidad);
+
+	        try (ResultSet rs = ps.executeQuery()) {
+	            if (rs.next()) {
+	                descripcion = rs.getString("descripcion");
+	            }
+	        }
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	    }
+
+	    return descripcion;
+	}
 
 	public void setLosMedicos(ArrayList<Medico> losMedicos) {
 		this.losMedicos = losMedicos;
