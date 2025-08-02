@@ -631,15 +631,29 @@ public class ClinicaMedica implements Serializable {
 
 	public Enfermedad buscarEnfermedadByCodigo(String codigo) {
 		Enfermedad enfermedad = null;
-		boolean encontrado = false;
-		int i = 0;
-		while(!encontrado && i < lasEnfermedades.size()) {
-			if(lasEnfermedades.get(i).getIdEnfermedad().equalsIgnoreCase(codigo)) {
-				enfermedad = lasEnfermedades.get(i);
-				encontrado = true;
+
+		String sql = "SELECT idEnfermedad, nombre, sintomas, idTipoEnfermedad FROM Enfermedad WHERE idEnfermedad = ?";
+
+		try (Connection conn = new Conexion().getConexion();
+		     PreparedStatement ps = conn.prepareStatement(sql)) {
+
+			ps.setString(1, codigo);
+			ResultSet rs = ps.executeQuery();
+
+			if (rs.next()) {
+				String id = rs.getString("idEnfermedad");
+				String nombre = rs.getString("nombre");
+				String sintomas = rs.getString("sintomas");
+				int idTipo = rs.getInt("idTipoEnfermedad");
+
+				enfermedad = new Enfermedad(id, nombre, sintomas, idTipo);
 			}
-			i++;
+
+			rs.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
 		}
+
 		return enfermedad;
 	}
 
