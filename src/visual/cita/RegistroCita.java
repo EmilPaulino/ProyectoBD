@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.sql.Time;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -21,6 +22,7 @@ import javax.swing.border.TitledBorder;
 
 import logico.Cita;
 import logico.ClinicaMedica;
+import logico.Especialidad;
 import logico.Medico;
 import visual.medico.SeleccionarMedico;
 
@@ -87,7 +89,7 @@ public class RegistroCita extends JDialog {
 			}
 			
 			txtCodigo = new JTextField();
-			txtCodigo.setText("C-"+ClinicaMedica.getInstance().codCita);
+			txtCodigo.setText(ClinicaMedica.getInstance().generarNuevoCodigoCita());
 			txtCodigo.setEditable(false);
 			txtCodigo.setBounds(69, 24, 342, 20);
 			panel_1.add(txtCodigo);
@@ -178,7 +180,8 @@ public class RegistroCita extends JDialog {
 					medico = sm.getSelectedMedico();
 					if(medico != null) {
 						txtMedico.setText(medico.getNombre()+" "+medico.getApellido());
-						txtEspecialidad.setText(medico.getEspecialidad());
+						String esp = ClinicaMedica.getInstance().getEspecialidadByIdEspecialidad(medico.getEspecialidad());
+						txtEspecialidad.setText(esp);
 					}
 				}
 			});
@@ -196,46 +199,76 @@ public class RegistroCita extends JDialog {
 					btnRegistrar.setText("Modificar");
 				}
 				btnRegistrar.addActionListener(new ActionListener() {
-					@Override
-					public void actionPerformed(ActionEvent e) {
-						
-						if (selected == null) {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        
+                        if (selected == null) {
 
-							if (camposVacios()) {
-							    JOptionPane.showMessageDialog(null, "Todos los campos son obligatorios", "Informaci髇", JOptionPane.ERROR_MESSAGE);
-							} else if (ClinicaMedica.getInstance().existeCita((Date) spnFecha.getValue(), (Date) spnHora.getValue(), medico)) {
-							    JOptionPane.showMessageDialog(null, "No se pudo agendar cita, horario no disponible", "Informaci髇", JOptionPane.ERROR_MESSAGE);
-							} else {
-							    Cita cita = new Cita(
-							        txtCodigo.getText(),
-							        txtNombre.getText(),
-							        medico,
-							        (Date) spnFecha.getValue(),
-							        (Date) spnHora.getValue(),
-							        txtMotivo.getText()
-							    );
+                            if (camposVacios()) {
+                                JOptionPane.showMessageDialog(null, "Todos los campos son obligatorios", "Informaci锟絥", JOptionPane.ERROR_MESSAGE);
+                            } else {
+                                Date fecha = (Date) spnFecha.getValue();
+                                Date hora = (Date) spnHora.getValue();
+                               
+	                             Calendar calendar = Calendar.getInstance();
+	                             calendar.setTime(hora);
+	                             calendar.set(Calendar.SECOND, 0);
+	                             calendar.set(Calendar.MILLISECOND, 0);
+	
+	                             Time horaSQL = new Time(calendar.getTimeInMillis());
 
-							    ClinicaMedica.getInstance().insertarCita(cita);
+	                             if(ClinicaMedica.getInstance().existeCita(fecha, horaSQL, medico, txtCodigo.getText())) {
+	                                 JOptionPane.showMessageDialog(null, "Horario no disponible.", "Informaci锟絥", JOptionPane.ERROR_MESSAGE);
+	                                 return;
+	                             }else {
+	                            	 Cita cita = new Cita(
+	                                         txtCodigo.getText(),
+	                                         medico.getIdPersona(),
+	                                         txtNombre.getText(),
+	                                         fecha,
+	                                         horaSQL,
+	                                         txtMotivo.getText()
+	                                     );
 
-							    // Confirmar la operaci髇 y limpiar campos
-							    JOptionPane.showMessageDialog(null, "Operaci髇 Satisfactoria", "Informaci髇", JOptionPane.INFORMATION_MESSAGE);
-							    clean();
-							}
-						}
-						else {
-							selected.setIdCita(txtCodigo.getText());
-							selected.setNombrePersona(txtNombre.getText());
-							selected.setMedico(medico);
-							selected.setFecha((Date) spnFecha.getValue()); 
-							selected.setHora((Date) spnHora.getValue());
-							selected.setMotivo(txtMotivo.getText());
-							ClinicaMedica.getInstance().updateCita(selected);
-							ListadoCitas.loadCitas();
-							JOptionPane.showMessageDialog(null, "Operaci髇 exitosa", "Informaci髇", JOptionPane.INFORMATION_MESSAGE);
-							dispose();
-						}
-					}
-				});
+	                                     ClinicaMedica.getInstance().insertarCita(cita);
+
+	                                     JOptionPane.showMessageDialog(null, "Operaci贸n Satisfactoria", "Informaci贸n", JOptionPane.INFORMATION_MESSAGE);
+	                                     clean();
+	                             }
+                                
+                            }
+                        }
+                        else {
+                        	Date fecha = (Date) spnFecha.getValue();
+                        	selected.setCodCita(txtCodigo.getText());
+                            selected.setNombre(txtNombre.getText());
+                            selected.setIdPersona(medico.getIdPersona());
+                            selected.setFecha(fecha);
+
+                            // Procesar la hora para que tenga segundos y milisegundos en 0
+                            
+                            Date hora = (Date) spnHora.getValue();
+                            Calendar calendar = Calendar.getInstance();
+                            calendar.setTime(hora);
+                            calendar.set(Calendar.SECOND, 0);
+                            calendar.set(Calendar.MILLISECOND, 0);
+                            Time horaSQL = new Time(calendar.getTimeInMillis());
+
+                            selected.setHora(horaSQL);
+                            selected.setMotivo(txtMotivo.getText());
+                            if(ClinicaMedica.getInstance().existeCita(fecha, horaSQL, medico,selected.getCodCita())) {
+                            	JOptionPane.showMessageDialog(null, "Horario no disponible.", "Informaci贸n", JOptionPane.ERROR_MESSAGE);
+                            }else {
+                            	ClinicaMedica.getInstance().updateCita(selected);
+                                ListadoCitas.loadCitas();
+                                JOptionPane.showMessageDialog(null, "Operaci贸n exitosa", "Informaci贸n", JOptionPane.INFORMATION_MESSAGE);
+                                dispose();
+                            }
+
+                            
+                        }
+                    }
+                });
 				btnRegistrar.setActionCommand("OK");
 				buttonPane.add(btnRegistrar);
 				getRootPane().setDefaultButton(btnRegistrar);
@@ -255,7 +288,7 @@ public class RegistroCita extends JDialog {
 		loadCita();
 	}
 	private void clean() {
-	    txtCodigo.setText("C-" + ClinicaMedica.getInstance().codCita);
+	    txtCodigo.setText(ClinicaMedica.getInstance().generarNuevoCodigoCita());
 	    txtNombre.setText("");
 	    spnFecha.setValue(new Date());
 	    spnHora.setValue(new Date());
@@ -274,14 +307,17 @@ public class RegistroCita extends JDialog {
 	}
 	private void loadCita() {
 		if(selected != null) {
-			txtCodigo.setText(selected.getIdCita());
-			txtNombre.setText(selected.getNombrePersona());
-			txtMedico.setText(selected.getMedico().getNombre()+" "+selected.getMedico().getApellido());
-			txtEspecialidad.setText(selected.getMedico().getEspecialidad());
+			txtCodigo.setText(selected.getCodCita());
+			txtNombre.setText(selected.getNombre());
+			Medico med = ClinicaMedica.getInstance().buscarMedicoByIdPersona(selected.getIdPersona());
+			medico = med;
+			txtMedico.setText(medico.getNombre()+' '+medico.getApellido());
+			String esp = ClinicaMedica.getInstance().getEspecialidadByIdEspecialidad(medico.getEspecialidad());
+			txtEspecialidad.setText(esp);
 			txtMotivo.setText(selected.getMotivo());
-			medico = selected.getMedico();
 			spnFecha.setValue(selected.getFecha());
 			spnHora.setValue(selected.getHora());
+			
 		}
 	}
 }

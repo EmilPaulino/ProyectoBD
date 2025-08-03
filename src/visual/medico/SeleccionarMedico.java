@@ -48,7 +48,7 @@ public class SeleccionarMedico extends JDialog {
 	 * Create the dialog.
 	 */
 	public SeleccionarMedico() {
-		setTitle("Seleccionar m\u00E9dico");
+		setTitle("Seleccionar médico");
 		setBounds(100, 100, 616, 388);
 		getContentPane().setLayout(new BorderLayout());
 		contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
@@ -71,12 +71,12 @@ public class SeleccionarMedico extends JDialog {
 							if(index >= 0) {
 								btnSeleccionar.setEnabled(true);
 								String codigo = table.getValueAt(index, 0).toString();
-								selected = ClinicaMedica.getInstance().buscarMedicoById(codigo);
+								selected = ClinicaMedica.getInstance().buscarMedicoByIdPersona(codigo);
 							}
 						}
 					});
 					modelo = new DefaultTableModel();
-					String[] identificadores = {"C�digo", "Nombre", "Apellido", "Especialidad"};
+					String[] identificadores = {"Código", "Nombre", "Apellido", "Especialidad"};
 					modelo.setColumnIdentifiers(identificadores);
 					table.setModel(modelo);
 					scrollPane.setViewportView(table);
@@ -115,7 +115,6 @@ public class SeleccionarMedico extends JDialog {
 		}
 		loadMedicos();
 	}
-	
 	private void loadMedicos() {
 		modelo.setRowCount(0);
 		ArrayList<Medico> selected = ClinicaMedica.getInstance().getLosMedicos();
@@ -124,8 +123,7 @@ public class SeleccionarMedico extends JDialog {
 			row[0] = medico.getIdPersona();
 			row[1] = medico.getNombre();
 			row[2] = medico.getApellido();
-			String especialidad = ClinicaMedica.getInstance().getEspecialidadByIdEspecialidad(medico.getEspecialidad());
-			row[3] = especialidad;
+			row[3] = medico.getEspecialidad();
 			modelo.addRow(row);
 		}
 	}

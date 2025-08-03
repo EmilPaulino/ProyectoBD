@@ -2,3 +2,6 @@ src/conexionsql/
 /clinica.dat
 bin/ 
 *.class
+.classpath
+.project
+.settings/
