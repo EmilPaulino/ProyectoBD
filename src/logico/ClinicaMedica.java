@@ -887,20 +887,44 @@ public class ClinicaMedica implements Serializable {
 		    return filasAfectadas;
 	}
 
-	public Medico buscarMedicoByCedula(String codigo) {
-		Medico medico = null;
-		boolean encontrado = false;
-		int i = 0;
-		while(!encontrado && i < losMedicos.size()) {
-			if(losMedicos.get(i).getCedula().equalsIgnoreCase(codigo)) {
-				medico = losMedicos.get(i);
-				encontrado = true;
-			}
-			i++;
-		}
-		return medico;
-	}
+	public Medico buscarMedicoByCedula(String cedula) {
+	    Medico medico = null;
 
+	    try {
+	        Connection conn = new Conexion().getConexion();
+	        String sql = "SELECT p.*, m.idEspecialidad, m.exequatur " +
+	                     "FROM Persona p " +
+	                     "JOIN Medico m ON p.idPersona = m.idPersona " +
+	                     "WHERE p.cedula = ? AND p.idPersona LIKE 'M-%'";
+	        PreparedStatement ps = conn.prepareStatement(sql);
+	        ps.setString(1, cedula);
+	        ResultSet rs = ps.executeQuery();
+
+	        if (rs.next()) {
+	            String idPersona = rs.getString("idPersona");
+	            String nombre = rs.getString("nombre");
+	            String apellido = rs.getString("apellido");
+	            String telefono = rs.getString("telefono");
+	            String direccion = rs.getString("direccion");
+	            Date fechaNacimiento = rs.getDate("fechaNacimiento");
+	            char sexo = rs.getString("sexo").charAt(0);
+	            int idEspecialidad = rs.getInt("idEspecialidad");
+	            int exequatur = rs.getInt("exequatur");
+
+	            medico = new Medico(idPersona, cedula, nombre, apellido, telefono, direccion,
+	                                 fechaNacimiento, sexo, idEspecialidad, exequatur);
+	        }
+
+	        rs.close();
+	        ps.close();
+	        conn.close();
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	    }
+
+	    return medico;
+	}
+	
 	public int buscarMedicoByCedulaGetIndex(String cedula) {
 		int medico = -1;
 		boolean encontrado = false;
