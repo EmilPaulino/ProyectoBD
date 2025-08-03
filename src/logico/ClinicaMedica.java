@@ -7,6 +7,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Time;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -230,38 +231,55 @@ public class ClinicaMedica implements Serializable {
 	public void setLosPacientes(ArrayList<Paciente> losPacientes) {
 		this.losPacientes = losPacientes;
 	}
+	
+	public static int calcularEdad(Date fechaNacimiento) {
+	    if (fechaNacimiento == null) return 0;
+
+	    Calendar nacimiento = Calendar.getInstance();
+	    nacimiento.setTime(fechaNacimiento);
+
+	    Calendar hoy = Calendar.getInstance();
+
+	    int edad = hoy.get(Calendar.YEAR) - nacimiento.get(Calendar.YEAR);
+
+	    // Verifica si aï¿½n no ha cumplido aï¿½os en este aï¿½o
+	    if (hoy.get(Calendar.DAY_OF_YEAR) < nacimiento.get(Calendar.DAY_OF_YEAR)) {
+	        edad--;
+	    }
+
+	    return edad;
+	}
 
 	public ArrayList<Medico> getLosMedicos() {
 	    ArrayList<Medico> medicos = new ArrayList<>();
-	    Connection con = null;
-	    PreparedStatement stmt = null;
+	    Connection conn = null;
+	    PreparedStatement ps = null;
 	    ResultSet rs = null;
 
 	    try {
-	        Conexion conexion = new Conexion();
-	        con = conexion.getConexion();
+	        conn = new Conexion().getConexion();
+	        String sql = "SELECT p.idPersona, p.cedula, p.nombre, p.apellido, p.telefono, p.direccion, " +
+	                     "p.fechaNacimiento, p.sexo, m.idEspecialidad, m.exequatur " +
+	                     "FROM Persona p " +
+	                     "JOIN Medico m ON p.idPersona = m.idPersona";
 
-	        String sql = "SELECT p.idPersona, p.cedula, p.nombre, p.apellido, p.telefono, p.direccion, "
-	                   + "p.fechaNacimiento, p.sexo, m.idEspecialidad, m.exequatur "
-	                   + "FROM Persona p "
-	                   + "INNER JOIN Medico m ON p.idPersona = m.idPersona";
-
-	        stmt = con.prepareStatement(sql);
-	        rs = stmt.executeQuery();
+	        ps = conn.prepareStatement(sql);
+	        rs = ps.executeQuery();
 
 	        while (rs.next()) {
-	            Medico medico = new Medico(
-	                rs.getString("idPersona"),
-	                rs.getString("cedula"),
-	                rs.getString("nombre"),
-	                rs.getString("apellido"),
-	                rs.getString("telefono"),
-	                rs.getString("direccion"),
-	                rs.getDate("fechaNacimiento"),
-	                rs.getString("sexo").charAt(0),
-	                rs.getInt("idEspecialidad"),
-	                rs.getInt("exequatur")
-	            );
+	            String idPersona = rs.getString("idPersona");
+	            String cedula = rs.getString("cedula");
+	            String nombre = rs.getString("nombre");
+	            String apellido = rs.getString("apellido");
+	            String telefono = rs.getString("telefono");
+	            String direccion = rs.getString("direccion");
+	            Date fechaNacimiento = rs.getDate("fechaNacimiento");
+	            char sexo = rs.getString("sexo").charAt(0);
+	            int idEspecialidad = rs.getInt("idEspecialidad");
+	            int exequatur = rs.getInt("exequatur");
+
+	            Medico medico = new Medico(idPersona, cedula, nombre, apellido, telefono, direccion,
+	                                       fechaNacimiento, sexo, idEspecialidad, exequatur);
 	            medicos.add(medico);
 	        }
 
@@ -270,14 +288,35 @@ public class ClinicaMedica implements Serializable {
 	    } finally {
 	        try {
 	            if (rs != null) rs.close();
-	            if (stmt != null) stmt.close();
-	            if (con != null) con.close();
+	            if (ps != null) ps.close();
+	            if (conn != null) conn.close();
 	        } catch (SQLException e) {
 	            e.printStackTrace();
 	        }
 	    }
 
 	    return medicos;
+	}
+	
+	public String getEspecialidadByIdEspecialidad(int idEspecialidad) {
+	    String descripcion = null;
+	    String sql = "SELECT descripcion FROM Especialidad WHERE idEspecialidad = ?";
+
+	    try (Connection conn = new Conexion().getConexion();
+	         PreparedStatement ps = conn.prepareStatement(sql)) {
+
+	        ps.setInt(1, idEspecialidad);
+
+	        try (ResultSet rs = ps.executeQuery()) {
+	            if (rs.next()) {
+	                descripcion = rs.getString("descripcion");
+	            }
+	        }
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	    }
+
+	    return descripcion;
 	}
 
 	public void setLosMedicos(ArrayList<Medico> losMedicos) {
@@ -369,7 +408,6 @@ public class ClinicaMedica implements Serializable {
 	    return citas;
 	}
 
-
 	public void setLasCitas(ArrayList<Cita> lasCitas) {
 		this.lasCitas = lasCitas;
 	}
@@ -430,8 +468,49 @@ public class ClinicaMedica implements Serializable {
 	}
 
 	public void insertarMedico(Medico medico) {
-		losMedicos.add(medico);
-		codMedico++;
+	    Connection con = null;
+	    PreparedStatement psPersona = null;
+	    PreparedStatement psMedico = null;
+
+	    try {
+	        Conexion conexion = new Conexion();
+	        con = conexion.getConexion();
+
+	        // Insertar en tabla Persona
+	        String sqlPersona = "INSERT INTO Persona (idPersona, cedula, nombre, apellido, telefono, direccion, fechaNacimiento, sexo) " +
+	                            "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+	        psPersona = con.prepareStatement(sqlPersona);
+	        psPersona.setString(1, medico.getIdPersona());
+	        psPersona.setString(2, medico.getCedula());
+	        psPersona.setString(3, medico.getNombre());
+	        psPersona.setString(4, medico.getApellido());
+	        psPersona.setString(5, medico.getTelefono());
+	        psPersona.setString(6, medico.getDireccion());
+	        psPersona.setDate(7, new java.sql.Date(medico.getFechaNacimiento().getTime()));
+	        psPersona.setString(8, String.valueOf(medico.getSexo()));
+
+	        psPersona.executeUpdate();
+
+	        // Insertar en tabla Medico
+	        String sqlMedico = "INSERT INTO Medico (idPersona, idEspecialidad, exequatur) VALUES (?, ?, ?)";
+	        psMedico = con.prepareStatement(sqlMedico);
+	        psMedico.setString(1, medico.getIdPersona());
+	        psMedico.setInt(2, medico.getEspecialidad());
+	        psMedico.setInt(3, medico.getExequatur());
+
+	        psMedico.executeUpdate();
+
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	    } finally {
+	        try {
+	            if (psPersona != null) psPersona.close();
+	            if (psMedico != null) psMedico.close();
+	            if (con != null) con.close();
+	        } catch (SQLException e) {
+	            e.printStackTrace();
+	        }
+	    }
 	}
 
 	public void insertarEnfermedad(Enfermedad enfermedad) {
@@ -463,6 +542,38 @@ public class ClinicaMedica implements Serializable {
 				e.printStackTrace();
 			}
 		}
+	}
+	
+	public String generarNuevoCodigoEnfermedad() {
+	    String nuevoCodigo = "E-1"; // Valor por defecto
+	    Connection conn = null;
+	    PreparedStatement ps = null;
+	    ResultSet rs = null;
+
+	    try {
+	        conn = new Conexion().getConexion();
+	        String sql = "SELECT MAX(CAST(SUBSTRING(idEnfermedad, 3, LEN(idEnfermedad)) AS INT)) FROM Enfermedad";
+	        ps = conn.prepareStatement(sql);
+	        rs = ps.executeQuery();
+
+	        if (rs.next()) {
+	            int ultimoNumero = rs.getInt(1);
+	            nuevoCodigo = "E-" + (ultimoNumero + 1);
+	        }
+
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	    } finally {
+	        try {
+	            if (rs != null) rs.close();
+	            if (ps != null) ps.close();
+	            if (conn != null) conn.close();
+	        } catch (SQLException e) {
+	            e.printStackTrace();
+	        }
+	    }
+
+	    return nuevoCodigo;
 	}
 
 	public void insertarVacuna (Vacuna vacuna) {
@@ -631,29 +742,15 @@ public class ClinicaMedica implements Serializable {
 
 	public Enfermedad buscarEnfermedadByCodigo(String codigo) {
 		Enfermedad enfermedad = null;
-
-		String sql = "SELECT idEnfermedad, nombre, sintomas, idTipoEnfermedad FROM Enfermedad WHERE idEnfermedad = ?";
-
-		try (Connection conn = new Conexion().getConexion();
-		     PreparedStatement ps = conn.prepareStatement(sql)) {
-
-			ps.setString(1, codigo);
-			ResultSet rs = ps.executeQuery();
-
-			if (rs.next()) {
-				String id = rs.getString("idEnfermedad");
-				String nombre = rs.getString("nombre");
-				String sintomas = rs.getString("sintomas");
-				int idTipo = rs.getInt("idTipoEnfermedad");
-
-				enfermedad = new Enfermedad(id, nombre, sintomas, idTipo);
+		boolean encontrado = false;
+		int i = 0;
+		while(!encontrado && i < lasEnfermedades.size()) {
+			if(lasEnfermedades.get(i).getIdEnfermedad().equalsIgnoreCase(codigo)) {
+				enfermedad = lasEnfermedades.get(i);
+				encontrado = true;
 			}
-
-			rs.close();
-		} catch (SQLException e) {
-			e.printStackTrace();
+			i++;
 		}
-
 		return enfermedad;
 	}
 
@@ -876,7 +973,6 @@ public class ClinicaMedica implements Serializable {
 	    return cita;
 	}
 
-
 	public int buscarCitaByIdGetIndex(String idCita) {
 		int index = -1;
 		boolean encontrado = false;
@@ -949,48 +1045,17 @@ public class ClinicaMedica implements Serializable {
 	    }
 	}
 
-	public boolean existeCita(Date fecha, Time hora, Medico medico, String codCita) {
-	    boolean existe = false;
-	    Connection con = null;
-	    PreparedStatement ps = null;
-	    ResultSet rs = null;
-
-	    try {
-	        Conexion conexion = new Conexion();
-	        con = conexion.getConexion();
-
-	        String sql = "SELECT COUNT(*) FROM Cita WHERE fecha = ? AND hora = ? AND idPersona = ? AND codCita != ?";
-	        ps = con.prepareStatement(sql);
-	        java.sql.Date sqlFecha = new java.sql.Date(fecha.getTime());
-	        java.sql.Time sqlHora = hora; // Ya es java.sql.Time
-	        
-	        ps.setDate(1, sqlFecha);
-	        ps.setString(2, sqlHora.toString());
-	        ps.setString(3, medico.getIdPersona());
-	        ps.setString(4, codCita);
-
-	        rs = ps.executeQuery();
-	        if (rs.next()) {
-	            int count = rs.getInt(1);
-	            existe = count > 0;
-	        }
-
-	    } catch (SQLException e) {
-	        e.printStackTrace();
-	    } finally {
-	        try {
-	            if (rs != null) rs.close();
-	            if (ps != null) ps.close();
-	            if (con != null) con.close();
-	        } catch (SQLException ex) {
-	            ex.printStackTrace();
-	        }
-	    }
-
-	    return existe;
+	public boolean existeCita(Date fecha, Date hora, Medico medico) {
+		boolean existe = false;
+		int i = 0;
+		while(!existe && i<lasCitas.size()) {
+			if(lasCitas.get(i).getFecha().equals(fecha) && lasCitas.get(i).getHora().equals(hora) && lasCitas.get(i).getMedico().equals(medico)) {
+				existe = true;
+			}
+			i++;
+		}
+		return existe;
 	}
-
-
 
 	public Vacuna buscarVacunaByCodigo(String codigo) {
 		Vacuna vacuna = null;
@@ -1086,7 +1151,7 @@ public class ClinicaMedica implements Serializable {
 
 			rs.close();
 			ps.close();
-			miConexion.cerrarConexion();  // Cierra la conexión al final
+			miConexion.cerrarConexion();  // Cierra la conexiï¿½n al final
 
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -1101,7 +1166,7 @@ public class ClinicaMedica implements Serializable {
 		PreparedStatement psUpdateCod = null;
 		try {
 			conn = new Conexion().getConexion();
-			conn.setAutoCommit(false); //Para hacer una transacción
+			conn.setAutoCommit(false); //Para hacer una transacciï¿½n
 
 			String sqlInsert = "INSERT INTO Usuario (idUsuario, usuario, contrasenia, idRol, idPersona) VALUES (?, ?, ?, ?, ?)";
 			psInsert = conn.prepareStatement(sqlInsert);
@@ -1179,9 +1244,8 @@ public class ClinicaMedica implements Serializable {
 	    ArrayList<Paciente> pacientes = new ArrayList<>();
 
 	    String query = "SELECT DISTINCT p.idPersona, p.cedula, p.nombre, p.apellido, p.telefono, " +
-	                   "p.direccion, p.fechaNacimiento, p.sexo, pac.estatura, pac.peso " +
-	                   "FROM Persona p "+
-	                   "JOIN Paciente pac ON p.idPersona = pac.idPersona " +
+	                   "p.direccion, p.fechaNacimiento, p.sexo, p.estatura, p.peso " +
+	                   "FROM Paciente p " +
 	                   "JOIN HistorialClinico hc ON p.idPersona = hc.idPersona " +
 	                   "JOIN Historial_Enfermedad he ON hc.idHistorialClinico = he.idHistorialClinico " +
 	                   "WHERE he.idEnfermedad = ?";
@@ -1264,7 +1328,7 @@ public class ClinicaMedica implements Serializable {
 			if (rows > 0) {
 				System.out.println("Usuario actualizado correctamente en la base de datos.");
 			} else {
-				System.out.println("No se encontró el usuario para actualizar.");
+				System.out.println("No se encontrï¿½ el usuario para actualizar.");
 			}
 
 		} catch (SQLException e) {
@@ -1330,6 +1394,8 @@ public class ClinicaMedica implements Serializable {
 		}
 		return roles;
 	}
+	
+	
 
 	public Medico buscarMedicoByIdPersona(String idPersona) {
 		Medico medico = null;
@@ -1480,7 +1546,30 @@ public class ClinicaMedica implements Serializable {
 		return nuevoCodigo;
 	}
 
+	public static String generarNuevoCodigoMedico() {
+	    String nuevoCodigo = "M-1"; // Valor por defecto si no hay mï¿½dicos
 
+	    try {
+	        Connection conn = new Conexion().getConexion();
+	        String sql = "SELECT MAX(CAST(SUBSTRING(idPersona, 3, LEN(idPersona)) AS INT)) FROM Persona WHERE idPersona LIKE 'M-%'";
+	        PreparedStatement ps = conn.prepareStatement(sql);
+	        ResultSet rs = ps.executeQuery();
+
+	        if (rs.next()) {
+	            int ultimoNumero = rs.getInt(1);
+	            nuevoCodigo = "M-" + (ultimoNumero + 1);
+	        }
+
+	        rs.close();
+	        ps.close();
+	        conn.close();
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	    }
+
+	    return nuevoCodigo;
+	}
+	
 	public static String generarNuevoCodigoPaciente() {
 		String nuevoCodigo = "Pac-1"; // Valor por defecto si no hay pacientes
 
@@ -1680,15 +1769,36 @@ public class ClinicaMedica implements Serializable {
 			int filasActualizadas = ps.executeUpdate();
 
 			if (filasActualizadas > 0) {
-				return 1; // actualización exitosa
+				return 1; // actualizaciï¿½n exitosa
 			} else {
-				return 0; // no se encontró o no se actualizó nada
+				return 0; // no se encontrï¿½ o no se actualizï¿½ nada
 			}
 
 		} catch (SQLException e) {
 			e.printStackTrace();
 			return 0; 
 		}
+	}
+	
+	public ArrayList<TipoEnfermedad> getTiposEnfermedades() {
+		ArrayList<TipoEnfermedad> tipos = new ArrayList<>();
+		String sql = "SELECT idTipoEnfermedad, nombreTipo FROM TipoEnfermedad";
+
+		try (Connection conn = new Conexion().getConexion();
+			 PreparedStatement ps = conn.prepareStatement(sql);
+			 ResultSet rs = ps.executeQuery()) {
+
+			while (rs.next()) {
+				int id = rs.getInt("idTipoEnfermedad");
+				String nombre = rs.getString("nombreTipo");
+
+				TipoEnfermedad tipo = new TipoEnfermedad(id, nombre);
+				tipos.add(tipo);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return tipos;
 	}
 
 	public String getTipoEnfermedadByIdEnfermedad(int idTipoEnfermedad) {
@@ -1763,7 +1873,7 @@ public class ClinicaMedica implements Serializable {
 
 	            psInsert.executeUpdate();
 	        } else {
-	            System.out.println("No se encontró historial clínico para el paciente con id: " + idPaciente);
+	            System.out.println("No se encontrï¿½ historial clï¿½nico para el paciente con id: " + idPaciente);
 	        }
 
 	    } catch (SQLException e) {
@@ -1811,44 +1921,7 @@ public class ClinicaMedica implements Serializable {
 
 	    return nuevoCodigo;
 	}
-
-	public Especialidad buscarEspecialidadByCodigo(int codigoEspecialidad) {
-	    Especialidad especialidadEncontrada = null;
-	    Connection con = null;
-	    PreparedStatement ps = null;
-	    ResultSet rs = null;
-
-	    try {
-	        Conexion conexion = new Conexion();
-	        con = conexion.getConexion();
-
-	        String sql = "SELECT idEspecialidad, descripcion FROM Especialidad WHERE idEspecialidad = ?";
-	        ps = con.prepareStatement(sql);
-	        ps.setInt(1, codigoEspecialidad);
-	        rs = ps.executeQuery();
-
-	        if (rs.next()) {
-	            int id = rs.getInt("idEspecialidad");
-	            String nombre = rs.getString("descripcion");
-
-	            especialidadEncontrada = new Especialidad(id, nombre);
-	        }
-
-	    } catch (SQLException e) {
-	        e.printStackTrace();
-	    } finally {
-	        try {
-	            if (rs != null) rs.close();
-	            if (ps != null) ps.close();
-	            if (con != null) con.close();
-	        } catch (SQLException e) {
-	            e.printStackTrace();
-	        }
-	    }
-
-	    return especialidadEncontrada;
-	}
-
+	
 	public String generarNuevoCodigoCita() {
 		String nuevoCodigo = "CT-1"; // Valor por defecto
 	    Connection conn = null;
@@ -1862,7 +1935,7 @@ public class ClinicaMedica implements Serializable {
 	        rs = ps.executeQuery();
 
 	        if (rs.next()) {
-	            int ultimoNumero = rs.getInt(1); // si no hay resultados, será 0
+	            int ultimoNumero = rs.getInt(1); // si no hay resultados, serï¿½ 0
 	            nuevoCodigo = "CT-" + (ultimoNumero + 1);
 	        }
 
@@ -1880,5 +1953,47 @@ public class ClinicaMedica implements Serializable {
 
 	    return nuevoCodigo;
 	}
+	
+	public boolean existeCita(Date fecha, Time hora, Medico medico, String codCita) {
+	    boolean existe = false;
+	    Connection con = null;
+	    PreparedStatement ps = null;
+	    ResultSet rs = null;
+
+	    try {
+	        Conexion conexion = new Conexion();
+	        con = conexion.getConexion();
+
+	        String sql = "SELECT COUNT(*) FROM Cita WHERE fecha = ? AND hora = ? AND idPersona = ? AND codCita != ?";
+	        ps = con.prepareStatement(sql);
+	        java.sql.Date sqlFecha = new java.sql.Date(fecha.getTime());
+	        java.sql.Time sqlHora = hora; // Ya es java.sql.Time
+	        
+	        ps.setDate(1, sqlFecha);
+	        ps.setString(2, sqlHora.toString());
+	        ps.setString(3, medico.getIdPersona());
+	        ps.setString(4, codCita);
+
+	        rs = ps.executeQuery();
+	        if (rs.next()) {
+	            int count = rs.getInt(1);
+	            existe = count > 0;
+	        }
+
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	    } finally {
+	        try {
+	            if (rs != null) rs.close();
+	            if (ps != null) ps.close();
+	            if (con != null) con.close();
+	        } catch (SQLException ex) {
+	            ex.printStackTrace();
+	        }
+	    }
+
+	    return existe;
+	}
+
 
 }

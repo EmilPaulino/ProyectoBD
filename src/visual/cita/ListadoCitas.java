@@ -114,14 +114,14 @@ public class ListadoCitas extends JDialog {
 			            if (index >= 0 && selected != null) {
 			                int confirm = javax.swing.JOptionPane.showConfirmDialog(
 			                    null,
-			                    "¿Estás seguro de que deseas eliminar esta cita?",
-			                    "Confirmación de eliminación",
+			                    "Â¿EstÃ¡s seguro de que deseas eliminar esta cita?",
+			                    "ConfirmaciÃ³n de eliminaciÃ³n",
 			                    javax.swing.JOptionPane.YES_NO_OPTION
 			                );
 
 			                if (confirm == javax.swing.JOptionPane.YES_OPTION) {
 			                    ClinicaMedica.getInstance().eliminarCita(selected);
-			                    javax.swing.JOptionPane.showMessageDialog(null, "Cita eliminada con éxito.");
+			                    javax.swing.JOptionPane.showMessageDialog(null, "Cita eliminada con Ã©xito.");
 			                    
 			                    loadCitas();
 			

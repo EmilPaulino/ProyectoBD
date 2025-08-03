@@ -180,8 +180,8 @@ public class RegistroCita extends JDialog {
 					medico = sm.getSelectedMedico();
 					if(medico != null) {
 						txtMedico.setText(medico.getNombre()+" "+medico.getApellido());
-						Especialidad esp = ClinicaMedica.getInstance().buscarEspecialidadByCodigo(medico.getEspecialidad());
-						txtEspecialidad.setText(esp.getDescripcion());
+						String esp = ClinicaMedica.getInstance().getEspecialidadByIdEspecialidad(medico.getEspecialidad());
+						txtEspecialidad.setText(esp);
 					}
 				}
 			});
@@ -205,7 +205,8 @@ public class RegistroCita extends JDialog {
                         if (selected == null) {
 
                             if (camposVacios()) {
-                                JOptionPane.showMessageDialog(null, "Todos los campos son obligatorios", "Informaci髇", JOptionPane.ERROR_MESSAGE);
+                                JOptionPane.showMessageDialog(null, "Todos los campos son obligatorios", "Informaci贸n", JOptionPane.ERROR_MESSAGE);
+
                             } else {
                                 Date fecha = (Date) spnFecha.getValue();
                                 Date hora = (Date) spnHora.getValue();
@@ -218,7 +219,8 @@ public class RegistroCita extends JDialog {
 	                             Time horaSQL = new Time(calendar.getTimeInMillis());
 
 	                             if(ClinicaMedica.getInstance().existeCita(fecha, horaSQL, medico, txtCodigo.getText())) {
-	                                 JOptionPane.showMessageDialog(null, "Horario no disponible.", "Informaci髇", JOptionPane.ERROR_MESSAGE);
+	                                 JOptionPane.showMessageDialog(null, "Horario no disponible.", "Informaci贸n", JOptionPane.ERROR_MESSAGE);
+
 	                                 return;
 	                             }else {
 	                            	 Cita cita = new Cita(
@@ -231,8 +233,7 @@ public class RegistroCita extends JDialog {
 	                                     );
 
 	                                     ClinicaMedica.getInstance().insertarCita(cita);
-
-	                                     JOptionPane.showMessageDialog(null, "Operaci髇 Satisfactoria", "Informaci髇", JOptionPane.INFORMATION_MESSAGE);
+	                                     JOptionPane.showMessageDialog(null, "Operaci贸n Satisfactoria", "Informaci贸n", JOptionPane.INFORMATION_MESSAGE);
 	                                     clean();
 	                             }
                                 
@@ -257,11 +258,11 @@ public class RegistroCita extends JDialog {
                             selected.setHora(horaSQL);
                             selected.setMotivo(txtMotivo.getText());
                             if(ClinicaMedica.getInstance().existeCita(fecha, horaSQL, medico,selected.getCodCita())) {
-                            	JOptionPane.showMessageDialog(null, "Horario no disponible.", "Informaci髇", JOptionPane.ERROR_MESSAGE);
+                            	JOptionPane.showMessageDialog(null, "Horario no disponible.", "Informaci贸n", JOptionPane.ERROR_MESSAGE);
                             }else {
                             	ClinicaMedica.getInstance().updateCita(selected);
                                 ListadoCitas.loadCitas();
-                                JOptionPane.showMessageDialog(null, "Operaci髇 exitosa", "Informaci髇", JOptionPane.INFORMATION_MESSAGE);
+                                JOptionPane.showMessageDialog(null, "Operaci贸n exitosa", "Informaci贸n", JOptionPane.INFORMATION_MESSAGE);
                                 dispose();
                             }
 
@@ -312,8 +313,8 @@ public class RegistroCita extends JDialog {
 			Medico med = ClinicaMedica.getInstance().buscarMedicoByIdPersona(selected.getIdPersona());
 			medico = med;
 			txtMedico.setText(medico.getNombre()+' '+medico.getApellido());
-			Especialidad esp = ClinicaMedica.getInstance().buscarEspecialidadByCodigo(medico.getEspecialidad());
-			txtEspecialidad.setText(esp.getDescripcion());
+			String esp = ClinicaMedica.getInstance().getEspecialidadByIdEspecialidad(medico.getEspecialidad());
+			txtEspecialidad.setText(esp);
 			txtMotivo.setText(selected.getMotivo());
 			spnFecha.setValue(selected.getFecha());
 			spnHora.setValue(selected.getHora());

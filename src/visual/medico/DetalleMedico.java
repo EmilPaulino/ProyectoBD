@@ -16,6 +16,7 @@ import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 
 import logico.Medico;
+import logico.ClinicaMedica;
 
 public class DetalleMedico extends JDialog {
 
@@ -208,9 +209,16 @@ public class DetalleMedico extends JDialog {
 			txtDireccion.setText(selected.getDireccion());
 			SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
 			txtFecha.setText(dateFormat.format(selected.getFechaNacimiento()));
-			spnEdad.setValue(selected.getEdad());
-			txtSexo.setText(selected.getSexo());
-			txtEspecialidad.setText(selected.getEspecialidad());
+			spnEdad.setValue(ClinicaMedica.calcularEdad(selected.getFechaNacimiento()));
+			char sexo = selected.getSexo();
+			if (sexo == 'M') {
+			    txtSexo.setText("Masculino");
+			} else if (sexo == 'F') {
+			    txtSexo.setText("Femenino");
+			} else {
+			    txtSexo.setText(""); // Por si acaso viene nulo u otro valor
+			}
+			txtEspecialidad.setText(ClinicaMedica.getInstance().getEspecialidadByIdEspecialidad((selected.getEspecialidad())));
 			spnExequatur.setValue(selected.getExequatur());
 		}
 		

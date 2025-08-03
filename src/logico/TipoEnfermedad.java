@@ -35,4 +35,8 @@ public class TipoEnfermedad implements Serializable {
 		this.nombreTipo = nombreTipo;
 	}
 	
+	@Override
+	public String toString() {
+		return nombreTipo; // Así se mostrará en el ComboBox
+	}
 }
