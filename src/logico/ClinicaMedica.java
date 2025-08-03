@@ -1824,6 +1824,27 @@ public class ClinicaMedica implements Serializable {
 		}
 		return tipos;
 	}
+	
+	public ArrayList<Especialidad> getLasEspecialidades() {
+		ArrayList<Especialidad> especialidades = new ArrayList<>();
+		String sql = "SELECT idEspecialidad, descripcion FROM Especialidad";
+
+		try (Connection conn = new Conexion().getConexion();
+			 PreparedStatement ps = conn.prepareStatement(sql);
+			 ResultSet rs = ps.executeQuery()) {
+
+			while (rs.next()) {
+				int id = rs.getInt("idEspecialidad");
+				String descripcion = rs.getString("descripcion");
+
+				Especialidad esp = new Especialidad(id, descripcion);
+				especialidades.add(esp);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return especialidades;
+	}
 
 	public String getTipoEnfermedadByIdEnfermedad(int idTipoEnfermedad) {
 		String tipoNombre = null;
