@@ -1407,7 +1407,30 @@ public class ClinicaMedica implements Serializable {
 		return nuevoCodigo;
 	}
 
+	public static String generarNuevoCodigoMedico() {
+	    String nuevoCodigo = "M-1"; // Valor por defecto si no hay médicos
 
+	    try {
+	        Connection conn = new Conexion().getConexion();
+	        String sql = "SELECT MAX(CAST(SUBSTRING(idPersona, 3, LEN(idPersona)) AS INT)) FROM Persona WHERE idPersona LIKE 'M-%'";
+	        PreparedStatement ps = conn.prepareStatement(sql);
+	        ResultSet rs = ps.executeQuery();
+
+	        if (rs.next()) {
+	            int ultimoNumero = rs.getInt(1);
+	            nuevoCodigo = "M-" + (ultimoNumero + 1);
+	        }
+
+	        rs.close();
+	        ps.close();
+	        conn.close();
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	    }
+
+	    return nuevoCodigo;
+	}
+	
 	public static String generarNuevoCodigoPaciente() {
 		String nuevoCodigo = "Pac-1"; // Valor por defecto si no hay pacientes
 
