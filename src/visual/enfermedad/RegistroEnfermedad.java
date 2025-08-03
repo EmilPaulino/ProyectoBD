@@ -79,8 +79,7 @@ public class RegistroEnfermedad extends JDialog {
 				txtCodigo.setBounds(76, 19, 362, 20);
 				panel.add(txtCodigo);
 				txtCodigo.setColumns(10);
-				txtCodigo.setText("E-"+ClinicaMedica.getInstance().codEnfermedad);
-
+				txtCodigo.setText(ClinicaMedica.getInstance().generarNuevoCodigoEnfermedad());
 			}
 			{
 				JLabel lblNewLabel_1 = new JLabel("Nombre:");
