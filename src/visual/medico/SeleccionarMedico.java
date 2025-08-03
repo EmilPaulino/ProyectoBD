@@ -67,7 +67,6 @@ public class SeleccionarMedico extends JDialog {
 					table.addMouseListener(new MouseAdapter() {
 						@Override
 						public void mouseClicked(MouseEvent e) {
-							index = table.getSelectedRow();
 							if(index >= 0) {
 								btnSeleccionar.setEnabled(true);
 								String codigo = table.getValueAt(index, 0).toString();
@@ -117,9 +116,9 @@ public class SeleccionarMedico extends JDialog {
 	}
 	private void loadMedicos() {
 		modelo.setRowCount(0);
-		ArrayList<Medico> selected = ClinicaMedica.getInstance().getLosMedicos();
+		ArrayList<Medico> me = ClinicaMedica.getInstance().getLosMedicos();
 		row = new Object[table.getColumnCount()];
-		for(Medico medico:selected) {
+		for(Medico medico:me) {
 			row[0] = medico.getIdPersona();
 			row[1] = medico.getNombre();
 			row[2] = medico.getApellido();
