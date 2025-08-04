@@ -31,7 +31,8 @@ public class ListadoVacunasGeneral extends JDialog {
 	private Vacuna selected;
 	private JButton btnModificar;
 	private int index = -1;
-	
+	private JButton btnEliminar;
+
 	/** 
 	 * Launch the application.
 	 */
@@ -64,14 +65,14 @@ public class ListadoVacunasGeneral extends JDialog {
 				panel.add(scrollPane, BorderLayout.CENTER);
 				{
 					table = new JTable();
-					
+
 					table.addMouseListener(new MouseAdapter() {
 						@Override
 						public void mouseClicked(MouseEvent e) {
 							index = table.getSelectedRow();
-							if(index >= 0 && !ClinicaMedica.getLoginUsuario().equals("Médico")) {
+							if(index >= 0) {
 								btnModificar.setEnabled(true);
-								btnModificar.setEnabled(true);
+								btnEliminar.setEnabled(true);
 								String codigo = table.getValueAt(index, 0).toString();
 								selected = ClinicaMedica.getInstance().buscarVacunaByCodigo(codigo);
 							}
@@ -91,17 +92,8 @@ public class ListadoVacunasGeneral extends JDialog {
 			buttonPane.setLayout(new FlowLayout(FlowLayout.RIGHT));
 			getContentPane().add(buttonPane, BorderLayout.SOUTH);
 			{
-				JButton btnCancelar = new JButton("Cancelar");
-				btnCancelar.addActionListener(new ActionListener() {
-					@Override
-					public void actionPerformed(ActionEvent e) {
-						dispose();
-					}
-				});
-				btnCancelar.setActionCommand("Cancel");
-				buttonPane.add(btnCancelar);
-				
-				btnAgregar = new JButton("Agregar");
+
+				btnAgregar = new JButton("Insertar");
 				btnAgregar.addActionListener(new ActionListener() {
 					@Override
 					public void actionPerformed(ActionEvent e) {
@@ -115,10 +107,10 @@ public class ListadoVacunasGeneral extends JDialog {
 				btnAgregar.setActionCommand("OK");
 				buttonPane.add(btnAgregar);
 				getRootPane().setDefaultButton(btnAgregar);
-				
+
 				btnModificar = new JButton("Modificar");
-				
-				
+
+
 				btnModificar.addActionListener(new ActionListener() {
 					@Override
 					public void actionPerformed(ActionEvent e) {
@@ -127,39 +119,77 @@ public class ListadoVacunasGeneral extends JDialog {
 						rv.setVisible(true);
 						loadVacunas();
 					}
-					
 
-					
+
+
 				});
 				btnModificar.setEnabled(false);
 				btnModificar.setActionCommand("OK");
 				buttonPane.add(btnModificar);
 				getRootPane().setDefaultButton(btnModificar);
 			}
+			JButton btnCancelar = new JButton("Cancelar");
+			btnCancelar.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					dispose();
+				}
+			});
+			{
+				btnEliminar = new JButton("Eliminar");
+				btnEliminar.addActionListener(new ActionListener() {
+					public void actionPerformed(ActionEvent e) {
+						if (index >= 0 && selected != null) {
+							int confirm = javax.swing.JOptionPane.showConfirmDialog(
+									null,
+									"¿Estás seguro de que deseas eliminar esta vacuna?",
+									"Confirmación de eliminación",
+									javax.swing.JOptionPane.YES_NO_OPTION
+									);
+
+							if (confirm == javax.swing.JOptionPane.YES_OPTION) {
+								ClinicaMedica.getInstance().eliminarVacuna(selected);
+								javax.swing.JOptionPane.showMessageDialog(null, "Vacuna eliminada con éxito.");
+
+								loadVacunas();
+
+								btnEliminar.setEnabled(false);
+								btnModificar.setEnabled(false);
+							}
+						} else {
+							javax.swing.JOptionPane.showMessageDialog(null, "No se ha seleccionado ninguna vacuna.");
+						}
+					}
+				});
+				btnEliminar.setEnabled(false);
+				buttonPane.add(btnEliminar);
+			}
+			btnCancelar.setActionCommand("Cancel");
+			buttonPane.add(btnCancelar);
 		}
 		loadVacunas();
 	}
 	private void loadVacunas() {
-	    SimpleDateFormat dateFormatter = new SimpleDateFormat("dd/MM/yyyy");
-	    modelo.setRowCount(0);
+		SimpleDateFormat dateFormatter = new SimpleDateFormat("dd/MM/yyyy");
+		modelo.setRowCount(0);
 
-	    ArrayList<Vacuna> vac = ClinicaMedica.getInstance().getVacunasGenerales();
-	    if (vac == null || vac.isEmpty()) {
-	        JOptionPane.showMessageDialog(this, "No hay vacunas disponibles.");
-	        return;
-	    }
+		ArrayList<Vacuna> vac = ClinicaMedica.getInstance().getVacunasGenerales();
+		if (vac == null || vac.isEmpty()) {
+			JOptionPane.showMessageDialog(this, "No hay vacunas disponibles.");
+			return;
+		}
 
-	    row = new Object[6]; 
-	    for (Vacuna vacunas : vac) {
-	        row[0] = vacunas.getIdVacuna();
-	        row[1] = (vacunas.getFechaVencimiento() != null) ? dateFormatter.format(vacunas.getFechaVencimiento()) : "Fecha no disponible";
-	        row[2] = vacunas.getNombre();
-	        String tipo = ClinicaMedica.getInstance().getTipoVacunaByCodTipoVacuna(vacunas.getCodTipoVacuna());
-	        row[3] = tipo;
-	        row[4] = vacunas.getIdFabricante();
-	        String fabricante = ClinicaMedica.getInstance().getFabricanteByIdFabricante(vacunas.getIdFabricante());
-	        row[5] = vacunas.getCantStock();
-	        modelo.addRow(row);
-	    }
+		row = new Object[6]; 
+		for (Vacuna vacunas : vac) {
+			row[0] = vacunas.getIdVacuna();
+			row[1] = (vacunas.getFechaVencimiento() != null) ? dateFormatter.format(vacunas.getFechaVencimiento()) : "Fecha no disponible";
+			row[2] = vacunas.getNombre();
+			String tipo = ClinicaMedica.getInstance().getTipoVacunaByCodTipoVacuna(vacunas.getCodTipoVacuna());
+			row[3] = tipo;
+			String fabricante = ClinicaMedica.getInstance().getFabricanteByIdFabricante(vacunas.getIdFabricante());
+			row[4] = fabricante;
+			row[5] = vacunas.getCantStock();
+			modelo.addRow(row);
+		}
 	}
 }

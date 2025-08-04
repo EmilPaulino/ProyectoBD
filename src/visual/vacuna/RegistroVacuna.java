@@ -46,7 +46,6 @@ public class RegistroVacuna extends JDialog {
 	public static void main(String[] args) {
 		try {
 			RegistroVacuna dialog = new RegistroVacuna(null);
-			dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 			dialog.setVisible(true);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -65,7 +64,7 @@ public class RegistroVacuna extends JDialog {
 			setTitle("Modificar vacuna");
 		}
 		
-		setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
+		setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 		setTitle("Registrar Vacuna");
 		setBounds(100, 100, 507, 236);
 		getContentPane().setLayout(new BorderLayout());
@@ -174,7 +173,7 @@ public class RegistroVacuna extends JDialog {
 							clean();
 						}
 						else {
-							selected.setIdVacuna(ClinicaMedica.getInstance().generarNuevoCodigoVacuna());
+							selected.setIdVacuna(txtCodigo.getText());
 							selected.setNombre(txtNombre.getText());
 							selected.setFechaVencimiento((Date)spnFechaVen.getValue());
 							TipoVacuna tipoSeleccionado = (TipoVacuna) cbxTipo.getSelectedItem();
@@ -182,8 +181,9 @@ public class RegistroVacuna extends JDialog {
 							Fabricante fabricanteSeleccionado = (Fabricante) cbxFabricante.getSelectedItem();
 							int idFabricante = fabricanteSeleccionado.getIdFabricante();
 							selected.setCantStock((int)spnCantidad.getValue());
-							ClinicaMedica.getInstance().updateVacuna(selected.getIdVacuna(), vacuna);
+							ClinicaMedica.getInstance().updateVacuna(selected);
 							JOptionPane.showMessageDialog(null,"Operacion exitosa","Informacion",JOptionPane.INFORMATION_MESSAGE);
+							dispose();
 						}
 					}
 

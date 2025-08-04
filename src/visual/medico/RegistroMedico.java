@@ -165,30 +165,8 @@ public class RegistroMedico extends JDialog {
 			panel.add(label_6);
 			
 			spnFechaNacim = new JSpinner();
-			spnFechaNacim.addChangeListener(new ChangeListener() {
-				@Override
-				public void stateChanged(ChangeEvent e) {
-					// valor en el jspinner
-					Date fechaNacimiento = (Date) spnFechaNacim.getValue();
-
-					// obtener fecha actual
-					Calendar fechaActual = Calendar.getInstance();
-
-					// calendario con la fecha de nacimiento
-					Calendar nacimiento = Calendar.getInstance();
-					nacimiento.setTime(fechaNacimiento);
-
-					// calcular edad
-					int edad = fechaActual.get(Calendar.YEAR) - nacimiento.get(Calendar.YEAR);
-
-					// ajustar si no ha cumplido anos
-					if (fechaActual.get(Calendar.DAY_OF_YEAR) < nacimiento.get(Calendar.DAY_OF_YEAR)) {
-					    edad--;
-					}
-
-				}
-			});
-			spnFechaNacim.setModel(new SpinnerDateModel(new Date(1732248000000L), null, null, Calendar.DAY_OF_YEAR));
+			spnFechaNacim.setModel(new SpinnerDateModel(new Date(), null, null, Calendar.MILLISECOND));
+			spnFechaNacim.setEditor(new JSpinner.DateEditor(spnFechaNacim, "dd/MM/yyyy"));
 			spnFechaNacim.setBounds(128, 123, 129, 20);
 			panel.add(spnFechaNacim);
 			
@@ -350,16 +328,34 @@ public class RegistroMedico extends JDialog {
 			spnExequatur.setValue(selected.getExequatur());
             spnFechaNacim.setValue(selected.getFechaNacimiento());
             
-            int idEspecialidad = selected.getEspecialidad();
+            char sexo = selected.getSexo();
+	        String sexoTexto;
+	        if (sexo == 'M') {
+	            sexoTexto = "Masculino";
+	        } else if (sexo == 'F') {
+	            sexoTexto = "Femenino";
+	        } else {
+	            sexoTexto = "<Seleccione>";
+	        }
+	        cbxSexo.setSelectedItem(sexoTexto);
+	        
+	        int idEspecialidadDelMedico = selected.getEspecialidad();
+
 	        for (int i = 0; i < cbxEspecialidad.getItemCount(); i++) {
-	            TipoEnfermedad tipo = (TipoEnfermedad) cbxEspecialidad.getItemAt(i);
-	            if (tipo.getIdTipoEnfermedad() == idEspecialidad) {
+	            Especialidad esp = (Especialidad) cbxEspecialidad.getItemAt(i);
+	            if (esp.getIdEspecialidad() == idEspecialidadDelMedico) {
 	                cbxEspecialidad.setSelectedIndex(i);
 	                break;
 	            }
 	        }
+	        
+	        txtCedula.setEditable(false);
+	        txtNombre.setEditable(false);
+	        txtApellido.setEditable(false);
+	        spnFechaNacim.setEnabled(false);
+	        cbxSexo.setEnabled(false);
+	        spnExequatur.setEnabled(false);
 
-			
 		}
 	}
 	

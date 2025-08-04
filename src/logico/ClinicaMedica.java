@@ -242,7 +242,6 @@ public class ClinicaMedica implements Serializable {
 
 	    int edad = hoy.get(Calendar.YEAR) - nacimiento.get(Calendar.YEAR);
 
-	    // Verifica si a�n no ha cumplido a�os en este a�o
 	    if (hoy.get(Calendar.DAY_OF_YEAR) < nacimiento.get(Calendar.DAY_OF_YEAR)) {
 	        edad--;
 	    }
@@ -347,7 +346,7 @@ public class ClinicaMedica implements Serializable {
 	
 	public String getTipoVacunaByCodTipoVacuna(int idTipoVacuna) {
 	    String nombreTipo = null;
-	    String sql = "SELECT nombreTipo FROM TipoVacuna WHERE idTipoVacuna = ?";
+	    String sql = "SELECT nombreTipo FROM TipoVacuna WHERE codTipoVacuna = ?";
 
 	    try (Connection conn = new Conexion().getConexion();
 	         PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -695,10 +694,31 @@ public class ClinicaMedica implements Serializable {
 	    return nuevoCodigo;
 	}
 	
-	public void insertarVacuna (Vacuna vacuna) {
-		lasVacunas.add(vacuna);
-		codVacuna++;
+	public boolean insertarVacuna(Vacuna vacuna) {
+	    boolean insertado = false;
+
+	    String sql = "INSERT INTO Vacuna (idVacuna, nombre, codTipoVacuna, idFabricante, fechaVencimiento, cantStock) "
+	               + "VALUES (?, ?, ?, ?, ?, ?)";
+
+	    try (Connection conn = new Conexion().getConexion();
+	         PreparedStatement ps = conn.prepareStatement(sql)) {
+
+	        ps.setString(1, vacuna.getIdVacuna());
+	        ps.setString(2, vacuna.getNombre());
+	        ps.setInt(3, vacuna.getCodTipoVacuna());
+	        ps.setInt(4, vacuna.getIdFabricante());
+	        ps.setDate(5, new java.sql.Date(vacuna.getFechaVencimiento().getTime()));
+	        ps.setInt(6, vacuna.getCantStock());
+	        ps.executeUpdate();
+
+
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	    }
+
+	    return insertado;
 	}
+
 
 	public void insertarCita (Cita cita) {
 		Connection con = null;
@@ -1067,12 +1087,45 @@ public class ClinicaMedica implements Serializable {
 		return false; 
 	}
 
-	public void updateMedico(Medico selected) {
-		int index = buscarMedicoByCedulaGetIndex(selected.getCedula());
-		if(index != 1) {
-			losMedicos.set(index, selected);
-		}
+	public int updateMedico(Medico medico) {
+	    int filasAfectadas = 0;
+
+	    String sqlPersona = "UPDATE Persona SET telefono = ?, direccion = ? WHERE idPersona = ?";
+	    String sqlMedico = "UPDATE Medico SET idEspecialidad = ?, exequatur = ? WHERE idPersona = ?";
+
+	    try (Connection conn = new Conexion().getConexion()) {
+	        conn.setAutoCommit(false); // iniciar transacción
+
+	        try (
+	            PreparedStatement psPersona = conn.prepareStatement(sqlPersona);
+	            PreparedStatement psMedico = conn.prepareStatement(sqlMedico)
+	        ) {
+	            // Actualizar Persona
+	            psPersona.setString(1, medico.getTelefono());
+	            psPersona.setString(2, medico.getDireccion());
+	            psPersona.setString(3, medico.getIdPersona());
+	            filasAfectadas += psPersona.executeUpdate();
+
+	            // Actualizar Medico
+	            psMedico.setInt(1, medico.getEspecialidad());
+	            psMedico.setInt(2, medico.getExequatur());
+	            psMedico.setString(3, medico.getIdPersona());
+	            filasAfectadas += psMedico.executeUpdate();
+
+	            conn.commit(); // confirmar transacción
+
+	        } catch (SQLException ex) {
+	            conn.rollback(); // deshacer si algo falla
+	            ex.printStackTrace();
+	            return 0;
+	        }
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	    }
+
+	    return filasAfectadas;
 	}
+
 
 	public Cita buscarCitaByIdCita(String idCita) {
 	    Cita cita = null;
@@ -1201,17 +1254,28 @@ public class ClinicaMedica implements Serializable {
 	}
 
 	public Vacuna buscarVacunaByCodigo(String codigo) {
-		Vacuna vacuna = null;
-		boolean encontrado = false;
-		int i = 0;
-		while (!encontrado && i < lasVacunas.size()) { 
-			if (lasVacunas.get(i).getIdVacuna().equalsIgnoreCase(codigo)) { 
-				vacuna = lasVacunas.get(i); 
-				encontrado = true; 
-			}
-			i++; 
-		}
-		return vacuna; 
+	    Vacuna vacuna = null;
+
+	    String sql = "SELECT * FROM Vacuna WHERE idVacuna = ?";
+
+	    try (Connection conn = new Conexion().getConexion();
+	         PreparedStatement ps = conn.prepareStatement(sql)) {
+
+	        ps.setString(1, codigo);
+	        ResultSet rs = ps.executeQuery();
+
+	        if (rs.next()) {
+	            vacuna = new Vacuna(rs.getString("idVacuna"), 
+	            		rs.getString("nombre"), rs.getInt("codTipoVacuna"),
+	            		rs.getInt("idFabricante"), rs.getDate("fechaVencimiento"),
+	            		rs.getInt("cantStock"));
+	        }
+
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	    }
+
+	    return vacuna;
 	}
 
 	public ArrayList<Vacuna> getVacunasGenerales() {
@@ -1241,25 +1305,56 @@ public class ClinicaMedica implements Serializable {
 	    return vacunas;
 	}
 
-	public boolean updateVacuna(String idVacuna, Vacuna nuevaVacuna) {
-		for (int i = 0; i < lasVacunas.size(); i++) {
-			if (lasVacunas.get(i).getIdVacuna().equalsIgnoreCase(idVacuna)) {
-				lasVacunas.set(i, nuevaVacuna);
-				return true; 
-			}
-		}
-		return false;
+	public boolean updateVacuna(Vacuna vacuna) {
+	    boolean actualizada = false;
+
+	    String sql = "UPDATE Vacuna "
+	               + "SET nombre = ?, codTipoVacuna = ?, idFabricante = ?, fechaVencimiento = ?, cantStock = ? "
+	               + "WHERE idVacuna = ?";
+
+	    try (Connection conn = new Conexion().getConexion();
+	         PreparedStatement ps = conn.prepareStatement(sql)) {
+
+	        ps.setString(1, vacuna.getNombre());
+	        ps.setInt(2, vacuna.getCodTipoVacuna());
+	        ps.setInt(3, vacuna.getIdFabricante());
+
+	        java.util.Date fecha = vacuna.getFechaVencimiento();
+	        ps.setDate(4, new java.sql.Date(fecha.getTime()));
+
+	        ps.setInt(5, vacuna.getCantStock());
+	        ps.setString(6, vacuna.getIdVacuna());
+
+	        int filasAfectadas = ps.executeUpdate();
+	        actualizada = (filasAfectadas > 0);
+
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	    }
+
+	    return actualizada;
 	}
 
-	public boolean eliminarVacuna(String idVacuna) {
-		for (int i = 0; i < lasVacunas.size(); i++) {
-			if (lasVacunas.get(i).getIdVacuna().equalsIgnoreCase(idVacuna)) {
-				lasVacunas.remove(i);
-				return true;
-			}
-		}
-		return false; 
+
+	public boolean eliminarVacuna(Vacuna selected) {
+	    boolean eliminada = false;
+
+	    String sql = "DELETE FROM Vacuna WHERE idVacuna = ?";
+
+	    try (Connection conn = new Conexion().getConexion();
+	         PreparedStatement ps = conn.prepareStatement(sql)) {
+
+	        ps.setString(1, selected.getIdVacuna());
+	        int filasAfectadas = ps.executeUpdate();
+	        eliminada = (filasAfectadas > 0);
+
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	    }
+
+	    return eliminada;
 	}
+
 
 	public int getCantPacientesPoseenEnfermedad(Enfermedad enfermedad) {
 	    int cantidad = 0;
