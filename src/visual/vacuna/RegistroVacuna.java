@@ -5,6 +5,7 @@ import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -23,7 +24,10 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 
 import logico.ClinicaMedica;
+import logico.TipoEnfermedad;
 import logico.Vacuna;
+import logico.TipoVacuna;
+import logico.Fabricante;
 
 public class RegistroVacuna extends JDialog {
 
@@ -106,7 +110,7 @@ public class RegistroVacuna extends JDialog {
 			txtNombre.setBounds(74, 50, 203, 20);
 			panel.add(txtNombre);
 			txtNombre.setColumns(10);
-			txtCodigo.setText("V-"+ClinicaMedica.getInstance().codVacuna);
+			txtCodigo.setText(ClinicaMedica.getInstance().generarNuevoCodigoVacuna());
 			
 			JLabel lblNewLabel_3 = new JLabel("Tipo:");
 			lblNewLabel_3.setHorizontalAlignment(SwingConstants.RIGHT);
@@ -114,9 +118,10 @@ public class RegistroVacuna extends JDialog {
 			panel.add(lblNewLabel_3);
 			
 			cbxTipo = new JComboBox();
-			cbxTipo.setModel(new DefaultComboBoxModel(new String[] {"<Seleccione>", "Tuberculosis", "Hepatitis B", "Polio", "Neumococo", "Sarampi\u00F3n", "Papera", "Varicela", "T\u00E9tano", "Difteria", "Fiebre amarilla", "COVID-19"}));
 			cbxTipo.setBounds(351, 50, 121, 20);
 			panel.add(cbxTipo);
+			
+			cargarTiposVacuna();
 			
 			JLabel lblNewLabel_4 = new JLabel("Fabricante:");
 			lblNewLabel_4.setHorizontalAlignment(SwingConstants.RIGHT);
@@ -124,9 +129,10 @@ public class RegistroVacuna extends JDialog {
 			panel.add(lblNewLabel_4);
 			
 			cbxFabricante = new JComboBox();
-			cbxFabricante.setModel(new DefaultComboBoxModel(new String[] {"<Seleccione>", "Pfizer-BioNTech", "Moderna", "AstraZeneca", "Johnson & Johnson ", "Sinovac Biotech", "Sinopharm", "GSK ", "Sanofi Pasteur", "Merck & Co.", "Serum Institute of India"}));
 			cbxFabricante.setBounds(74, 118, 380, 20);
 			panel.add(cbxFabricante);
+			
+			cargarFabricantes();
 			
 			JLabel lblNewLabel_5 = new JLabel("Cantidad:");
 			lblNewLabel_5.setHorizontalAlignment(SwingConstants.RIGHT);
@@ -156,36 +162,31 @@ public class RegistroVacuna extends JDialog {
 							String nombre = txtNombre.getText();
 						    SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
 						    Date fechaVen = (Date)(spnFechaVen.getValue());
-						    String tipo = cbxTipo.getSelectedItem().toString();
-						    String fabricante = cbxFabricante.getSelectedItem().toString();
+						    TipoVacuna tipoSeleccionado = (TipoVacuna) cbxTipo.getSelectedItem();
+							int codTipo = tipoSeleccionado.getCodTipoVacuna();
+							Fabricante fabricanteSeleccionado = (Fabricante) cbxFabricante.getSelectedItem();
+							int idFabricante = fabricanteSeleccionado.getIdFabricante();
 						    int cantidad = new Integer(spnCantidad.getValue().toString());
 							
-							Vacuna vacuna = new Vacuna(codigo,fechaVen,nombre,tipo,fabricante,cantidad);
+							Vacuna vacuna = new Vacuna(codigo,nombre,codTipo,idFabricante,fechaVen,cantidad);
 							ClinicaMedica.getInstance().insertarVacuna(vacuna);
 							JOptionPane.showMessageDialog(null,"Operacion exitosa","Informacion",JOptionPane.INFORMATION_MESSAGE);
 							clean();
 						}
 						else {
-							selected.setIdVacuna(txtCodigo.getText());
-							selected.setNombreVacuna(txtNombre.getText());
-							selected.setFecha((Date)spnFechaVen.getValue());
-							selected.setTipo(cbxTipo.getSelectedItem().toString());
-							selected.setFabricante(cbxFabricante.getSelectedItem().toString());
-							selected.setCantidad((int)spnCantidad.getValue());
+							selected.setIdVacuna(ClinicaMedica.getInstance().generarNuevoCodigoVacuna());
+							selected.setNombre(txtNombre.getText());
+							selected.setFechaVencimiento((Date)spnFechaVen.getValue());
+							TipoVacuna tipoSeleccionado = (TipoVacuna) cbxTipo.getSelectedItem();
+							int codTipo = tipoSeleccionado.getCodTipoVacuna();
+							Fabricante fabricanteSeleccionado = (Fabricante) cbxFabricante.getSelectedItem();
+							int idFabricante = fabricanteSeleccionado.getIdFabricante();
+							selected.setCantStock((int)spnCantidad.getValue());
 							ClinicaMedica.getInstance().updateVacuna(selected.getIdVacuna(), vacuna);
 							JOptionPane.showMessageDialog(null,"Operacion exitosa","Informacion",JOptionPane.INFORMATION_MESSAGE);
 						}
 					}
 
-					private void clean() {
-						txtCodigo.setText("V-"+ClinicaMedica.getInstance().codVacuna);
-						txtNombre.setText("");
-						cbxTipo.setSelectedIndex(0);
-						spnCantidad.setValue(0);
-						cbxFabricante.setSelectedIndex(0);
-						spnFechaVen.setValue(new Date());
-						
-					}
 				});
 				btnRegistrar.setActionCommand("OK");
 				buttonPane.add(btnRegistrar);
@@ -205,14 +206,57 @@ public class RegistroVacuna extends JDialog {
 		}
 		loadVacuna();
 	}
+	
+	private void clean() {
+		txtCodigo.setText(ClinicaMedica.getInstance().generarNuevoCodigoVacuna());
+		txtNombre.setText("");
+		cbxTipo.setSelectedIndex(0);
+		spnCantidad.setValue(0);
+		cbxFabricante.setSelectedIndex(0);
+		spnFechaVen.setValue(new Date());
+		
+	}
+	
 	private void loadVacuna() {
 		if (selected != null) {
 			txtCodigo.setText(selected.getIdVacuna());
-			txtNombre.setText(selected.getNombreVacuna());
-			cbxTipo.setSelectedItem(selected.getTipo());
-			spnCantidad.setValue(selected.getCantidad());
-			cbxFabricante.setSelectedItem(selected.getFabricante());
-			spnFechaVen.setValue(selected.getFecha());
+			txtNombre.setText(selected.getNombre());
+			int codTipo = selected.getCodTipoVacuna();
+	        for (int i = 0; i < cbxTipo.getItemCount(); i++) {
+	            TipoVacuna tipo = (TipoVacuna) cbxTipo.getItemAt(i);
+	            if (tipo.getCodTipoVacuna() == codTipo) {
+	                cbxTipo.setSelectedIndex(i);
+	                break;
+	            }
+	        }
+			spnCantidad.setValue(selected.getCantStock());
+			int idFabricante = selected.getIdFabricante();
+	        for (int i = 0; i < cbxFabricante.getItemCount(); i++) {
+	            Fabricante fabricante = (Fabricante) cbxFabricante.getItemAt(i);
+	            if (fabricante.getIdFabricante() == idFabricante) {
+	                cbxFabricante.setSelectedIndex(i);
+	                break;
+	            }
+	        }
+			spnFechaVen.setValue(selected.getFechaVencimiento());
 		}
+	}
+	
+	private void cargarTiposVacuna() {
+	    ArrayList<TipoVacuna> tipos = ClinicaMedica.getInstance().getLosTiposVacunas();
+	    cbxTipo.removeAllItems();
+	    
+	    for (TipoVacuna tipo : tipos) {
+	        cbxTipo.addItem(tipo);
+	    }
+	}
+	
+	private void cargarFabricantes() {
+	    ArrayList<Fabricante> fabricantes = ClinicaMedica.getInstance().getLosFabricantes();
+	    cbxFabricante.removeAllItems();
+	    
+	    for (Fabricante fabricante : fabricantes) {
+	        cbxFabricante.addItem(fabricante);
+	    }
 	}
 }
