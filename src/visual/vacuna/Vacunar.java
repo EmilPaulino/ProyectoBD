@@ -212,10 +212,10 @@ public class Vacunar extends JDialog {
 					vacuna = sv.getSelectedVacuna();
 					if(vacuna != null) {
 						txtCodVacuna.setText(vacuna.getIdVacuna());
-						spnFechVencim.setValue(vacuna.getFecha());
-						txtTipoVacuna.setText(vacuna.getTipo());
-						txtNomVacuna.setText(vacuna.getNombreVacuna());
-						txtFabricante.setText(vacuna.getFabricante());
+						spnFechVencim.setValue(vacuna.getFechaVencimiento());
+						txtTipoVacuna.setText(ClinicaMedica.getInstance().getTipoVacunaByCodTipoVacuna(vacuna.getCodTipoVacuna()));
+						txtNomVacuna.setText(vacuna.getNombre());
+						txtFabricante.setText(ClinicaMedica.getInstance().getFabricanteByIdFabricante(vacuna.getIdFabricante()));
 					}
 				}
 			});
@@ -232,8 +232,12 @@ public class Vacunar extends JDialog {
 				btnRegistrar.addActionListener(new ActionListener() {
 					public void actionPerformed(ActionEvent e) {
 						if(paciente != null && vacuna != null) {
-							paciente.getMisVacunas().add(vacuna);
-							vacuna.setCantidad(vacuna.getCantidad()-1);
+							if (ClinicaMedica.getInstance().registrarVacunacion(paciente, vacuna, new Date())) {
+							    JOptionPane.showMessageDialog(null, "Vacunación registrada correctamente.", "Éxito", JOptionPane.INFORMATION_MESSAGE);
+							    dispose();
+							} else {
+							    JOptionPane.showMessageDialog(null, "Error al registrar la vacunación.", "Error", JOptionPane.ERROR_MESSAGE);
+							}
 							JOptionPane.showMessageDialog(null, "Operacion Satisfactoria", "Informacion", JOptionPane.INFORMATION_MESSAGE);
 							dispose();
 						}
