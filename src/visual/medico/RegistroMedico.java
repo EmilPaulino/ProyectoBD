@@ -6,6 +6,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -28,7 +29,9 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import logico.ClinicaMedica;
+import logico.Especialidad;
 import logico.Medico;
+import logico.TipoEnfermedad;
 
 public class RegistroMedico extends JDialog {
 
@@ -44,7 +47,6 @@ public class RegistroMedico extends JDialog {
 	private JComboBox cbxSexo;
 	private JSpinner spnFechaNacim;
 	private Medico selected;
-	private JTextField txtEdad;
 
 	/**
 	 * Launch the application.
@@ -93,7 +95,7 @@ public class RegistroMedico extends JDialog {
 			txtCodigo.setColumns(10);
 			txtCodigo.setBounds(84, 11, 131, 20);
 			panel.add(txtCodigo);
-			txtCodigo.setText("M-"+ClinicaMedica.getInstance().codMedico);
+			txtCodigo.setText(ClinicaMedica.getInstance().generarNuevoCodigoMedico());
 			
 			JLabel label_1 = new JLabel("C\u00E9dula:");
 			label_1.setHorizontalAlignment(SwingConstants.RIGHT);
@@ -184,18 +186,11 @@ public class RegistroMedico extends JDialog {
 					    edad--;
 					}
 
-					// actualizar el txtEdad
-					txtEdad.setText(String.valueOf(edad));
 				}
 			});
 			spnFechaNacim.setModel(new SpinnerDateModel(new Date(1732248000000L), null, null, Calendar.DAY_OF_YEAR));
 			spnFechaNacim.setBounds(128, 123, 129, 20);
 			panel.add(spnFechaNacim);
-			
-			JLabel label_7 = new JLabel("Edad:");
-			label_7.setHorizontalAlignment(SwingConstants.RIGHT);
-			label_7.setBounds(266, 126, 36, 14);
-			panel.add(label_7);
 			
 			JLabel label_8 = new JLabel("Sexo:");
 			label_8.setHorizontalAlignment(SwingConstants.RIGHT);
@@ -213,9 +208,10 @@ public class RegistroMedico extends JDialog {
 			panel.add(lblNewLabel);
 			
 			cbxEspecialidad = new JComboBox();
-			cbxEspecialidad.setModel(new DefaultComboBoxModel(new String[] {"<Seleccione>", "Medicina General", "Pediatr\u00EDa", "Ginecolog\u00EDa y Obstetricia", "Cardiolog\u00EDa", "Dermatolog\u00EDa", "Oftalmolog\u00EDa", "Otorrinolaringolog\u00EDa", "Endocrinolog\u00EDa", "Ortopedia y Traumatolog\u00EDa", "Psiquiatr\u00EDa", "Urolog\u00EDa", "Neumolog\u00EDa"}));
 			cbxEspecialidad.setBounds(107, 159, 164, 20);
 			panel.add(cbxEspecialidad);
+			
+			cargarEspecialidades();
 			
 			JLabel lblNewLabel_1 = new JLabel("Exequatur:");
 			lblNewLabel_1.setHorizontalAlignment(SwingConstants.RIGHT);
@@ -226,12 +222,6 @@ public class RegistroMedico extends JDialog {
 			spnExequatur.setModel(new SpinnerNumberModel(new Integer(0), new Integer(0), null, new Integer(1)));
 			spnExequatur.setBounds(357, 159, 175, 20);
 			panel.add(spnExequatur);
-			
-			txtEdad = new JTextField();
-			txtEdad.setEnabled(false);
-			txtEdad.setBounds(311, 122, 56, 20);
-			panel.add(txtEdad);
-			txtEdad.setColumns(10);
 		}
 		{
 			JPanel buttonPane = new JPanel();
@@ -267,14 +257,23 @@ public class RegistroMedico extends JDialog {
 							String apellido = txtApellido.getText();
 							String telefono = txtTelefono.getText();
 							String direccion = txtDireccion.getText();
-							int edad = new Integer(txtEdad.getText());
-							String sexo = cbxSexo.getSelectedItem().toString();
-							String especialidad = cbxEspecialidad.getSelectedItem().toString();
+							String sexoStr = (String) cbxSexo.getSelectedItem();
+							char sexo;
+
+							if ("Masculino".equals(sexoStr)) {
+							    sexo = 'M';
+							} else if ("Femenino".equals(sexoStr)) {
+							    sexo = 'F';
+							} else {
+							    sexo = ' ';
+							}
+							Especialidad especialidadSeleccionada = (Especialidad) cbxEspecialidad.getSelectedItem();
+							int idEspecialidad = especialidadSeleccionada.getIdEspecialidad();
 							int exequatur = new Integer(spnExequatur.getValue().toString());
 						    SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
 						    Date fechaNacimiento = (Date)(spnFechaNacim.getValue());
 							
-							Medico medico = new Medico(codigo,cedula,nombre,apellido,telefono,direccion,fechaNacimiento,edad,sexo,especialidad,exequatur);
+							Medico medico = new Medico(codigo,cedula,nombre,apellido,telefono,direccion,fechaNacimiento,sexo,idEspecialidad,exequatur);
 							ClinicaMedica.getInstance().insertarMedico(medico);
 							JOptionPane.showMessageDialog(null,"Operacion exitosa","Informacion",JOptionPane.INFORMATION_MESSAGE);
 							clean();
@@ -284,9 +283,18 @@ public class RegistroMedico extends JDialog {
 							selected.setApellido(txtApellido.getText());
 							selected.setTelefono(txtTelefono.getText());
 							selected.setDireccion(txtDireccion.getText());
-							selected.setEdad(Integer.parseInt(txtEdad.getText()));
-							selected.setSexo((String) cbxSexo.getSelectedItem());
-							selected.setEspecialidad((String) cbxEspecialidad.getSelectedItem());
+							String sexoStr = (String) cbxSexo.getSelectedItem();
+							char sexo;
+
+							if ("Masculino".equals(sexoStr)) {
+							    sexo = 'M';
+							} else if ("Femenino".equals(sexoStr)) {
+							    sexo = 'F';
+							} else {
+							    sexo = ' ';
+							}
+							Especialidad especialidadSeleccionada = (Especialidad) cbxEspecialidad.getSelectedItem();
+							selected.setEspecialidad(especialidadSeleccionada.getIdEspecialidad());
 							selected.setExequatur(Integer.parseInt(spnExequatur.getValue().toString()));
 							selected.setFechaNacimiento((Date) spnFechaNacim.getValue());
 							ClinicaMedica.getInstance().updateMedico(selected);
@@ -297,13 +305,12 @@ public class RegistroMedico extends JDialog {
 					}
 
 					private void clean() {
-						txtCodigo.setText("M-"+ClinicaMedica.getInstance().codMedico);
+						txtCodigo.setText(ClinicaMedica.getInstance().generarNuevoCodigoMedico());
 						txtCedula.setText("");
 						txtNombre.setText("");
 						txtApellido.setText("");
 						txtTelefono.setText("");
 						txtDireccion.setText("");
-						txtEdad.setText("");
 						cbxSexo.setSelectedIndex(0);
 						cbxEspecialidad.setSelectedIndex(0);
 						spnFechaNacim.setValue(new Date());
@@ -339,11 +346,18 @@ public class RegistroMedico extends JDialog {
 			txtApellido.setText(selected.getApellido());
 			txtTelefono.setText(selected.getTelefono());
 			txtDireccion.setText(selected.getDireccion());
-			txtEdad.setText(String.valueOf(selected.getEdad()));
 			cbxSexo.setSelectedItem(selected.getSexo());
-			cbxEspecialidad.setSelectedItem(selected.getEspecialidad());
 			spnExequatur.setValue(selected.getExequatur());
             spnFechaNacim.setValue(selected.getFechaNacimiento());
+            
+            int idEspecialidad = selected.getEspecialidad();
+	        for (int i = 0; i < cbxEspecialidad.getItemCount(); i++) {
+	            TipoEnfermedad tipo = (TipoEnfermedad) cbxEspecialidad.getItemAt(i);
+	            if (tipo.getIdTipoEnfermedad() == idEspecialidad) {
+	                cbxEspecialidad.setSelectedIndex(i);
+	                break;
+	            }
+	        }
 
 			
 		}
@@ -354,9 +368,16 @@ public class RegistroMedico extends JDialog {
 	           txtCedula.getText().isEmpty() || 
 	           txtApellido.getText().isEmpty() || 
 	           txtTelefono.getText().isEmpty() || 
-	           txtDireccion.getText().isEmpty() || 
-	           txtEdad.getText().isEmpty() || 
-	           cbxSexo.getSelectedIndex() == 0 || 
-	           cbxEspecialidad.getSelectedIndex() == 0;
+	           txtDireccion.getText().isEmpty();
+	}
+	
+	private void cargarEspecialidades() {
+	    ArrayList<Especialidad> esps = ClinicaMedica.getInstance().getLasEspecialidades();
+
+	    cbxEspecialidad.removeAllItems();
+	    
+	    for (Especialidad especialidad : esps) {
+	        cbxEspecialidad.addItem(especialidad);
+	    }
 	}
 }
