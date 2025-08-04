@@ -82,42 +82,42 @@ public class ControlEnfermedades extends JDialog {
 					scrollPane.setViewportView(table);
 				}
 			}
-//		}
-		{
-			JPanel buttonPane = new JPanel();
-			buttonPane.setBorder(new TitledBorder(null, "", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-			buttonPane.setLayout(new FlowLayout(FlowLayout.RIGHT));
-			getContentPane().add(buttonPane, BorderLayout.SOUTH);
+
 			{
-				btnDetalle = new JButton("Ver detalle");
-				btnDetalle.addActionListener(new ActionListener() {
-					public void actionPerformed(ActionEvent e) {
-						if(enfermedad != null) {
-							DetalleControlEnfermedades dce = new DetalleControlEnfermedades(enfermedad);
-							dce.setModal(true);
-							dce.setVisible(true);
-							
+				JPanel buttonPane = new JPanel();
+				buttonPane.setBorder(new TitledBorder(null, "", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+				buttonPane.setLayout(new FlowLayout(FlowLayout.RIGHT));
+				getContentPane().add(buttonPane, BorderLayout.SOUTH);
+				{
+					btnDetalle = new JButton("Ver detalle");
+					btnDetalle.addActionListener(new ActionListener() {
+						public void actionPerformed(ActionEvent e) {
+							if(enfermedad != null) {
+								DetalleControlEnfermedades dce = new DetalleControlEnfermedades(enfermedad);
+								dce.setModal(true);
+								dce.setVisible(true);
+
+							}
 						}
-					}
-				});
-				btnDetalle.setEnabled(false);
-				btnDetalle.setActionCommand("OK");
-				buttonPane.add(btnDetalle);
-				getRootPane().setDefaultButton(btnDetalle);
+					});
+					btnDetalle.setEnabled(false);
+					btnDetalle.setActionCommand("OK");
+					buttonPane.add(btnDetalle);
+					getRootPane().setDefaultButton(btnDetalle);
+				}
+				{
+					JButton btnCancelar = new JButton("Cancelar");
+					btnCancelar.addActionListener(new ActionListener() {
+						public void actionPerformed(ActionEvent e) {
+							dispose();
+						}
+					});
+					btnCancelar.setActionCommand("Cancel");
+					buttonPane.add(btnCancelar);
+				}
 			}
-			{
-				JButton btnCancelar = new JButton("Cancelar");
-				btnCancelar.addActionListener(new ActionListener() {
-					public void actionPerformed(ActionEvent e) {
-						dispose();
-					}
-				});
-				btnCancelar.setActionCommand("Cancel");
-				buttonPane.add(btnCancelar);
-			}
-		}
-		loadEnfermedades();
-	}}
+			loadEnfermedades();
+		}}
 	private void loadEnfermedades() {
 		modelo.setRowCount(0);
 		ArrayList<Enfermedad> enf = ClinicaMedica.getInstance().getTodasLasEnfermedades();
