@@ -663,6 +663,38 @@ public class ClinicaMedica implements Serializable {
 	    return nuevoCodigo;
 	}
 
+	public String generarNuevoCodigoVacuna() {
+	    String nuevoCodigo = "V-1"; // Valor por defecto
+	    Connection conn = null;
+	    PreparedStatement ps = null;
+	    ResultSet rs = null;
+
+	    try {
+	        conn = new Conexion().getConexion();
+	        String sql = "SELECT MAX(CAST(SUBSTRING(idVacuna, 3, LEN(idVacuna)) AS INT)) FROM Vacuna";
+	        ps = conn.prepareStatement(sql);
+	        rs = ps.executeQuery();
+
+	        if (rs.next()) {
+	            int ultimoNumero = rs.getInt(1);
+	            nuevoCodigo = "V-" + (ultimoNumero + 1);
+	        }
+
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	    } finally {
+	        try {
+	            if (rs != null) rs.close();
+	            if (ps != null) ps.close();
+	            if (conn != null) conn.close();
+	        } catch (SQLException e) {
+	            e.printStackTrace();
+	        }
+	    }
+
+	    return nuevoCodigo;
+	}
+	
 	public void insertarVacuna (Vacuna vacuna) {
 		lasVacunas.add(vacuna);
 		codVacuna++;
