@@ -1759,6 +1759,70 @@ public class ClinicaMedica implements Serializable {
 
 		return nuevoCodigo;
 	}
+	
+	public static boolean registrarVacunacion(Paciente paciente, Vacuna vacuna, Date fechaAplicacion) {
+	    Connection conn = null;
+	    PreparedStatement ps = null;
+	    ResultSet rs = null;
+
+	    try {
+	        conn = new Conexion().getConexion();
+
+	        // 1. Obtener el idHistorialClinico del paciente
+	        String sqlHistorial = "SELECT idHistorialClinico FROM HistorialClinico WHERE idPersona = ?";
+	        ps = conn.prepareStatement(sqlHistorial);
+	        ps.setString(1, paciente.getIdPersona());
+	        rs = ps.executeQuery();
+
+	        int idHistorialClinico = -1;
+	        if (rs.next()) {
+	            idHistorialClinico = rs.getInt("idHistorialClinico");
+	        } else {
+	            // Crear historial si no existe
+	            rs.close();
+	            ps.close();
+	            String insertHistorial = "INSERT INTO HistorialClinico (idPersona) OUTPUT INSERTED.idHistorialClinico VALUES (?)";
+	            ps = conn.prepareStatement(insertHistorial);
+	            ps.setString(1, paciente.getIdPersona());
+	            rs = ps.executeQuery();
+	            if (rs.next()) {
+	                idHistorialClinico = rs.getInt(1);
+	            }
+	        }
+
+	        rs.close();
+	        ps.close();
+
+	        // 2. Insertar en Historial_Vacunacion
+	        String insertVac = "INSERT INTO Historial_Vacunacion (idHistorialClinico, idVacuna, fecha) VALUES (?, ?, ?)";
+	        ps = conn.prepareStatement(insertVac);
+	        ps.setInt(1, idHistorialClinico);
+	        ps.setString(2, vacuna.getIdVacuna());
+	        ps.setDate(3, new java.sql.Date(fechaAplicacion.getTime()));
+	        ps.executeUpdate();
+	        ps.close();
+
+	        // 3. Actualizar stock de la vacuna
+	        String updateStock = "UPDATE Vacuna SET cantStock = cantStock - 1 WHERE idVacuna = ?";
+	        ps = conn.prepareStatement(updateStock);
+	        ps.setString(1, vacuna.getIdVacuna());
+	        ps.executeUpdate();
+
+	        return true;
+
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	        return false;
+	    } finally {
+	        try {
+	            if (rs != null) rs.close();
+	            if (ps != null) ps.close();
+	            if (conn != null) conn.close();
+	        } catch (SQLException ex) {
+	            ex.printStackTrace();
+	        }
+	    }
+	}
 
 	public ArrayList<VacunaAplicada> getVacunasDeUnPaciente(String idPaciente) {
 
