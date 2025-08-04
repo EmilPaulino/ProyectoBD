@@ -323,7 +323,7 @@ public class ClinicaMedica implements Serializable {
 		this.losMedicos = losMedicos;
 	}
 	
-	public String getTipoVacunaByIdTipoVacuna(int idTipoVacuna) {
+	public String getTipoVacunaByCodTipoVacuna(int idTipoVacuna) {
 	    String nombreTipo = null;
 	    String sql = "SELECT nombreTipo FROM TipoVacuna WHERE idTipoVacuna = ?";
 
