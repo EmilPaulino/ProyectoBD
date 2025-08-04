@@ -323,6 +323,28 @@ public class ClinicaMedica implements Serializable {
 		this.losMedicos = losMedicos;
 	}
 	
+	public ArrayList<TipoVacuna> getLosTiposVacunas() {
+	    ArrayList<TipoVacuna> tipos = new ArrayList<>();
+	    String sql = "SELECT codTipoVacuna, nombreTipo FROM TipoVacuna";
+
+	    try (Connection conn = new Conexion().getConexion();
+	         PreparedStatement ps = conn.prepareStatement(sql);
+	         ResultSet rs = ps.executeQuery()) {
+
+	        while (rs.next()) {
+	            int cod = rs.getInt("codTipoVacuna");
+	            String nombre = rs.getString("nombreTipo");
+
+	            TipoVacuna tipo = new TipoVacuna(cod, nombre);
+	            tipos.add(tipo);
+	        }
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	    }
+
+	    return tipos;
+	}
+	
 	public String getTipoVacunaByCodTipoVacuna(int idTipoVacuna) {
 	    String nombreTipo = null;
 	    String sql = "SELECT nombreTipo FROM TipoVacuna WHERE idTipoVacuna = ?";
