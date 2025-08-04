@@ -20,6 +20,7 @@ import javax.swing.table.DefaultTableModel;
 
 import logico.ClinicaMedica;
 import logico.Vacuna;
+import logico.TipoVacuna;
 
 public class ListadoVacunasGeneral extends JDialog {
 	private final JPanel contentPanel = new JPanel();
@@ -151,11 +152,13 @@ public class ListadoVacunasGeneral extends JDialog {
 	    row = new Object[6]; 
 	    for (Vacuna vacunas : vac) {
 	        row[0] = vacunas.getIdVacuna();
-	        row[1] = (vacunas.getFecha() != null) ? dateFormatter.format(vacunas.getFecha()) : "Fecha no disponible";
-	        row[2] = vacunas.getNombreVacuna();
-	        row[3] = vacunas.getTipo();
-	        row[4] = vacunas.getFabricante();
-	        row[5] = vacunas.getCantidad();
+	        row[1] = (vacunas.getFechaVencimiento() != null) ? dateFormatter.format(vacunas.getFechaVencimiento()) : "Fecha no disponible";
+	        row[2] = vacunas.getNombre();
+	        String tipo = ClinicaMedica.getInstance().getTipoVacunaByCodTipoVacuna(vacunas.getCodTipoVacuna());
+	        row[3] = tipo;
+	        row[4] = vacunas.getIdFabricante();
+	        String fabricante = ClinicaMedica.getInstance().getFabricanteByIdFabricante(vacunas.getIdFabricante());
+	        row[5] = vacunas.getCantStock();
 	        modelo.addRow(row);
 	    }
 	}
