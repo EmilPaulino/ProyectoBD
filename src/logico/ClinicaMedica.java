@@ -366,6 +366,29 @@ public class ClinicaMedica implements Serializable {
 	    return nombreTipo;
 	}
 	
+	public ArrayList<Fabricante> getLosFabricantes() {
+	    ArrayList<Fabricante> fabricantes = new ArrayList<>();
+	    String sql = "SELECT idFabricante, nombre FROM Fabricante";
+
+	    try (Connection conn = new Conexion().getConexion();
+	         PreparedStatement ps = conn.prepareStatement(sql);
+	         ResultSet rs = ps.executeQuery()) {
+
+	        while (rs.next()) {
+	            int id = rs.getInt("idFabricante");
+	            String nombre = rs.getString("nombre");
+
+	            Fabricante fab = new Fabricante(id, nombre);
+	            fabricantes.add(fab);
+	        }
+
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	    }
+
+	    return fabricantes;
+	}
+	
 	public String getFabricanteByIdFabricante(int idFabricante) {
 	    String nombre = null;
 	    String sql = "SELECT nombre FROM Fabricante WHERE idFabricante = ?";
