@@ -907,14 +907,20 @@ public class ClinicaMedica implements Serializable {
 	}
 
 	public void actualizarEnfermedad(Enfermedad enfermedadActualizada) {
-		for (int i = 0; i < lasEnfermedades.size(); i++) {
-			Enfermedad enfermedad = lasEnfermedades.get(i);
-			if (enfermedad.getIdEnfermedad().equals(enfermedadActualizada.getIdEnfermedad())) {
-				lasEnfermedades.set(i, enfermedadActualizada);
-				return;
-			}
-		}
-		System.out.println("Enfermedad no encontrada para actualizar.");
+		String sql = "UPDATE Enfermedad SET nombre = ?, sintomas = ?, idTipoEnfermedad = ? WHERE idEnfermedad = ?";
+	    try (Connection conn = new Conexion().getConexion();
+	         PreparedStatement ps = conn.prepareStatement(sql)) {
+
+	        ps.setString(1, enfermedadActualizada.getNombre());
+	        ps.setString(2, enfermedadActualizada.getSintomas());
+	        ps.setInt(3, enfermedadActualizada.getIdTipoEnfermedad());
+	        ps.setString(4, enfermedadActualizada.getIdEnfermedad());
+	        ps.executeUpdate();
+
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	    }
+
 	}
 
 	public void actualizarPaciente(Paciente pacienteActualizado) {
@@ -1771,7 +1777,7 @@ public class ClinicaMedica implements Serializable {
 				+ "p.fechaNacimiento, p.sexo "
 				+ "FROM Persona p "
 				+ "LEFT JOIN Usuario u ON p.idPersona = u.idPersona "
-				+ "WHERE u.idPersona IS NULL";
+				+ "WHERE u.idPersona IS NULL AND p.idPersona NOT LIKE 'Pac-%'";
 
 		try (Connection conn = new Conexion().getConexion();
 				PreparedStatement ps = conn.prepareStatement(sql);
@@ -1876,8 +1882,9 @@ public class ClinicaMedica implements Serializable {
 
 	    try {
 	        conn = new Conexion().getConexion();
+	        conn.setAutoCommit(false);  // Inicia la transacción
 
-	        // 1. Obtener el idHistorialClinico del paciente
+	        // 1. Obtener idHistorialClinico (ya debe existir)
 	        String sqlHistorial = "SELECT idHistorialClinico FROM HistorialClinico WHERE idPersona = ?";
 	        ps = conn.prepareStatement(sqlHistorial);
 	        ps.setString(1, paciente.getIdPersona());
@@ -1887,22 +1894,13 @@ public class ClinicaMedica implements Serializable {
 	        if (rs.next()) {
 	            idHistorialClinico = rs.getInt("idHistorialClinico");
 	        } else {
-	            // Crear historial si no existe
-	            rs.close();
-	            ps.close();
-	            String insertHistorial = "INSERT INTO HistorialClinico (idPersona) OUTPUT INSERTED.idHistorialClinico VALUES (?)";
-	            ps = conn.prepareStatement(insertHistorial);
-	            ps.setString(1, paciente.getIdPersona());
-	            rs = ps.executeQuery();
-	            if (rs.next()) {
-	                idHistorialClinico = rs.getInt(1);
-	            }
+	            throw new SQLException("No se encontró historial clínico para el paciente.");
 	        }
 
 	        rs.close();
 	        ps.close();
 
-	        // 2. Insertar en Historial_Vacunacion
+	        //Insertar en Historial_Vacunacion
 	        String insertVac = "INSERT INTO Historial_Vacunacion (idHistorialClinico, idVacuna, fecha) VALUES (?, ?, ?)";
 	        ps = conn.prepareStatement(insertVac);
 	        ps.setInt(1, idHistorialClinico);
@@ -1911,27 +1909,38 @@ public class ClinicaMedica implements Serializable {
 	        ps.executeUpdate();
 	        ps.close();
 
-	        // 3. Actualizar stock de la vacuna
+	        //Actualizar stock de vacuna
 	        String updateStock = "UPDATE Vacuna SET cantStock = cantStock - 1 WHERE idVacuna = ?";
 	        ps = conn.prepareStatement(updateStock);
 	        ps.setString(1, vacuna.getIdVacuna());
 	        ps.executeUpdate();
 
+	        conn.commit();
 	        return true;
 
 	    } catch (SQLException e) {
 	        e.printStackTrace();
+	        try {
+	            if (conn != null) conn.rollback();
+	        } catch (SQLException ex) {
+	            ex.printStackTrace();
+	        }
 	        return false;
+
 	    } finally {
 	        try {
 	            if (rs != null) rs.close();
 	            if (ps != null) ps.close();
-	            if (conn != null) conn.close();
+	            if (conn != null) {
+	                conn.setAutoCommit(true);
+	                conn.close();
+	            }
 	        } catch (SQLException ex) {
 	            ex.printStackTrace();
 	        }
 	    }
 	}
+
 
 	public ArrayList<VacunaAplicada> getVacunasDeUnPaciente(String idPaciente) {
 
@@ -1995,7 +2004,7 @@ public class ClinicaMedica implements Serializable {
 		Fabricante fabricante = null;
 		try {
 			Connection conn = new Conexion().getConexion();
-			String sql = "SELECT * FROM Fabricante WHERE idFabricante = ?";
+			String sql = "SELECT idFabricante, nombre FROM Fabricante WHERE idFabricante = ?";
 			PreparedStatement ps = conn.prepareStatement(sql);
 			ps.setInt(1, idFabricante);
 			ResultSet rs = ps.executeQuery();
@@ -2233,7 +2242,7 @@ public class ClinicaMedica implements Serializable {
 
 	            psInsert.executeUpdate();
 	        } else {
-	            System.out.println("No se encontr� historial cl�nico para el paciente con id: " + idPaciente);
+	            System.out.println("No se encontró historial clínico para el paciente con id: " + idPaciente);
 	        }
 
 	    } catch (SQLException e) {

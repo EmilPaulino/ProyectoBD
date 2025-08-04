@@ -161,8 +161,9 @@ public class RegistroEnfermedad extends JDialog {
 							TipoEnfermedad tipoSeleccionado = (TipoEnfermedad) cbxTipo.getSelectedItem();
 							int idTipo = tipoSeleccionado.getIdTipoEnfermedad();
 							selected.setIdTipoEnfermedad(idTipo);
-							ListadoEnfermedades.loadEnfermedades();
+							ClinicaMedica.getInstance().actualizarEnfermedad(selected);
 							JOptionPane.showMessageDialog(null,"Operacion exitosa","Informacion",JOptionPane.INFORMATION_MESSAGE);
+							ListadoEnfermedades.loadEnfermedades();
 							dispose();
 						}
 
