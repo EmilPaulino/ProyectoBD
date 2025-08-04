@@ -116,21 +116,25 @@ public class SeleccionarVacuna extends JDialog {
 		}
 		loadVacunas();
 	}
+	
 	public static void loadVacunas() {
 		modelo.setRowCount(0);
-		ArrayList<Vacuna> vac = ClinicaMedica.getInstance().getLasVacunas();
+		ArrayList<Vacuna> vac = ClinicaMedica.getInstance().getVacunasGenerales();
 		row = new Object[table.getColumnCount()];
-		for(Vacuna vacunas:vac) {
-			if(vacunas.getCantidad() > 0) {
+		for(Vacuna vacunas: vac) {
+			if(vacunas.getCantStock() > 0) {
 				row[0] = vacunas.getIdVacuna();
-		        row[1] = vacunas.getNombreVacuna();
-		        row[2] = vacunas.getTipo();
-		        row[3] = vacunas.getFabricante();
-		        row[4] = vacunas.getCantidad();
+		        row[1] = vacunas.getNombre();
+		        String tipo = ClinicaMedica.getInstance().getTipoVacunaByCodTipoVacuna(vacunas.getCodTipoVacuna());
+				row[2] = tipo;
+				String fabricante = ClinicaMedica.getInstance().getFabricanteByIdFabricante(vacunas.getIdFabricante());
+				row[3] = fabricante;
+		        row[4] = vacunas.getCantStock();
 		        modelo.addRow(row);
 			}
 		}
 	}
+	
 	public Vacuna getSelectedVacuna() {
 		return selected;
 	}
