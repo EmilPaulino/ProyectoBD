@@ -1409,11 +1409,12 @@ public class ClinicaMedica implements Serializable {
 	public ArrayList<Paciente> getPacientesPorEnfermedad(String idEnfermedad) {
 	    ArrayList<Paciente> pacientes = new ArrayList<>();
 
-	    String query = "SELECT DISTINCT p.idPersona, p.cedula, p.nombre, p.apellido, p.telefono, " +
-	                   "p.direccion, p.fechaNacimiento, p.sexo, p.estatura, p.peso " +
-	                   "FROM Paciente p " +
-	                   "JOIN HistorialClinico hc ON p.idPersona = hc.idPersona " +
+	    String query = "SELECT DISTINCT per.idPersona, per.cedula, per.nombre, per.apellido, per.telefono, " +
+	                   "per.direccion, per.fechaNacimiento, per.sexo, pac.estatura, pac.peso " +
+	                   "FROM HistorialClinico hc " +
 	                   "JOIN Historial_Enfermedad he ON hc.idHistorialClinico = he.idHistorialClinico " +
+	                   "JOIN Paciente pac ON hc.idPersona = pac.idPersona " +
+	                   "JOIN Persona per ON pac.idPersona = per.idPersona " +
 	                   "WHERE he.idEnfermedad = ?";
 
 	    try (Connection conn = new Conexion().getConexion();
