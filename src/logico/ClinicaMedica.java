@@ -343,6 +343,27 @@ public class ClinicaMedica implements Serializable {
 
 	    return nombreTipo;
 	}
+	
+	public String getFabricanteByIdFabricante(int idFabricante) {
+	    String nombre = null;
+	    String sql = "SELECT nombre FROM Fabricante WHERE idFabricante = ?";
+
+	    try (Connection conn = new Conexion().getConexion();
+	         PreparedStatement ps = conn.prepareStatement(sql)) {
+
+	        ps.setInt(1, idFabricante);
+
+	        try (ResultSet rs = ps.executeQuery()) {
+	            if (rs.next()) {
+	                nombre = rs.getString("nombre");
+	            }
+	        }
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	    }
+
+	    return nombre;
+	}
 
 	public ArrayList<Enfermedad> getTodasLasEnfermedades() {
 	    ArrayList<Enfermedad> enfermedades = new ArrayList<>();
