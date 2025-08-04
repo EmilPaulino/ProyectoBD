@@ -1096,7 +1096,30 @@ public class ClinicaMedica implements Serializable {
 	}
 
 	public ArrayList<Vacuna> getVacunasGenerales() {
-		return lasVacunas;
+	    ArrayList<Vacuna> vacunas = new ArrayList<>();
+	    String sql = "SELECT idVacuna, nombre, codTipoVacuna, idFabricante, fechaVencimiento, cantStock FROM Vacuna";
+
+	    try (Connection conn = new Conexion().getConexion();
+	         PreparedStatement ps = conn.prepareStatement(sql);
+	         ResultSet rs = ps.executeQuery()) {
+
+	        while (rs.next()) {
+	            String idVacuna = rs.getString("idVacuna");
+	            String nombre = rs.getString("nombre");
+	            int codTipoVacuna = rs.getInt("codTipoVacuna");
+	            int idFabricante = rs.getInt("idFabricante");
+	            Date fechaVencimiento = rs.getDate("fechaVencimiento");
+	            int cantStock = rs.getInt("cantStock");
+
+	            Vacuna vacuna = new Vacuna(idVacuna, nombre, codTipoVacuna, idFabricante, fechaVencimiento, cantStock);
+	            vacunas.add(vacuna);
+	        }
+
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	    }
+
+	    return vacunas;
 	}
 
 	public boolean updateVacuna(String idVacuna, Vacuna nuevaVacuna) {
