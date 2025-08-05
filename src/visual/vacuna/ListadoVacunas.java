@@ -48,6 +48,7 @@ public class ListadoVacunas extends JDialog {
 		paciente = pac;
 		setTitle("Listado de vacunas");
 		setBounds(100, 100, 582, 355);
+		setLocationRelativeTo(null);
 		getContentPane().setLayout(new BorderLayout());
 		contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		getContentPane().add(contentPanel, BorderLayout.CENTER);

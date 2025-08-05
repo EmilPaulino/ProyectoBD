@@ -51,7 +51,9 @@ public class SeleccionarPersona extends JDialog {
 	 * Create the dialog.
 	 */
 	public SeleccionarPersona() {
+		setTitle("Seleccionar Persona");
 		setBounds(100, 100, 545, 329);
+		setLocationRelativeTo(null);
 		getContentPane().setLayout(new BorderLayout());
 		contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		getContentPane().add(contentPanel, BorderLayout.CENTER);
@@ -78,7 +80,7 @@ public class SeleccionarPersona extends JDialog {
 		});
 		scrollPane.setViewportView(table);
 		modelo = new DefaultTableModel();
-		String[] identificadores = {"C�digo", "C�dula", "Nombre"};
+		String[] identificadores = {"Código", "Cédula", "Nombre"};
 		modelo.setColumnIdentifiers(identificadores);
 		table.setModel(modelo);
 		{

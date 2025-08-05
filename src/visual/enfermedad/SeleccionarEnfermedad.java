@@ -50,6 +50,7 @@ public class SeleccionarEnfermedad extends JDialog {
 	public SeleccionarEnfermedad() {
 		setTitle("Seleccionar m\u00E9dico");
 		setBounds(100, 100, 512, 328);
+		setLocationRelativeTo(null);
 		getContentPane().setLayout(new BorderLayout());
 		contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		getContentPane().add(contentPanel, BorderLayout.CENTER);

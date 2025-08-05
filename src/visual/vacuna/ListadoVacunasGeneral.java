@@ -51,6 +51,7 @@ public class ListadoVacunasGeneral extends JDialog {
 	public ListadoVacunasGeneral() {
 		setTitle("Listado general de vacunas");
 		setBounds(100, 100, 582, 355);
+		setLocationRelativeTo(null);
 		getContentPane().setLayout(new BorderLayout());
 		contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		getContentPane().add(contentPanel, BorderLayout.CENTER);
@@ -148,8 +149,14 @@ public class ListadoVacunasGeneral extends JDialog {
 									);
 
 							if (confirm == javax.swing.JOptionPane.YES_OPTION) {
-								ClinicaMedica.getInstance().eliminarVacuna(selected);
-								javax.swing.JOptionPane.showMessageDialog(null, "Vacuna eliminada con éxito.");
+								Boolean resp = ClinicaMedica.getInstance().eliminarVacuna(selected);
+								if(resp) {
+									javax.swing.JOptionPane.showMessageDialog(null, "Vacuna eliminada con éxito.");
+								} else {
+									JOptionPane.showMessageDialog(null, "La vacuna seleccionada ya ha sido aplicada.", 
+	                                          "Error", JOptionPane.ERROR_MESSAGE);
+								}
+								
 
 								loadVacunas();
 

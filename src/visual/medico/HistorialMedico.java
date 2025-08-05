@@ -55,6 +55,7 @@ public class HistorialMedico extends JDialog {
 		selected = aux;
 		setTitle("Historial m\u00E9dico "+selected.getNombre());
 		setBounds(100, 100, 596, 376);
+		setLocationRelativeTo(null);
 		getContentPane().setLayout(new BorderLayout());
 		contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		getContentPane().add(contentPanel, BorderLayout.CENTER);

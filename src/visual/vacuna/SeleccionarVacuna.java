@@ -51,6 +51,7 @@ public class SeleccionarVacuna extends JDialog {
 	public SeleccionarVacuna() {
 		setTitle("Seleccionar vacuna");
 		setBounds(100, 100, 556, 354);
+		setLocationRelativeTo(null);
 		getContentPane().setLayout(new BorderLayout());
 		contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		getContentPane().add(contentPanel, BorderLayout.CENTER);

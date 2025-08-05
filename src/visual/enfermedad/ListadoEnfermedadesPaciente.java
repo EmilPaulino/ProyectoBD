@@ -57,6 +57,7 @@ public class ListadoEnfermedadesPaciente extends JDialog {
 		paciente = aux;
 		setTitle("Listado de enfermedades de "+paciente.getNombre()+" "+paciente.getApellido());
 		setBounds(100, 100, 584, 347);
+		setLocationRelativeTo(null);
 		getContentPane().setLayout(new BorderLayout());
 		contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		getContentPane().add(contentPanel, BorderLayout.CENTER);

@@ -50,6 +50,7 @@ public class ControlEnfermedades extends JDialog {
 	public ControlEnfermedades() {
 		setTitle("Control de enfermedades");
 		setBounds(100, 100, 654, 402);
+		setLocationRelativeTo(null);
 		getContentPane().setLayout(new BorderLayout());
 		contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		getContentPane().add(contentPanel, BorderLayout.CENTER);

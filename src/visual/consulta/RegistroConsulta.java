@@ -84,6 +84,7 @@ public class RegistroConsulta extends JDialog {
 			setTitle("Detalle de consulta");
 		}
 		setBounds(100, 100, 554, 470);
+		setLocationRelativeTo(null);
 		getContentPane().setLayout(new BorderLayout());
 		contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		getContentPane().add(contentPanel, BorderLayout.CENTER);

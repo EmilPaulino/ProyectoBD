@@ -48,8 +48,9 @@ public class SeleccionarMedico extends JDialog {
 	 * Create the dialog.
 	 */
 	public SeleccionarMedico() {
-		setTitle("Seleccionar médico");
+		setTitle("Seleccionar mÃ©dico");
 		setBounds(100, 100, 616, 388);
+		setLocationRelativeTo(null);
 		getContentPane().setLayout(new BorderLayout());
 		contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		getContentPane().add(contentPanel, BorderLayout.CENTER);
@@ -76,7 +77,7 @@ public class SeleccionarMedico extends JDialog {
 						}
 					});
 					modelo = new DefaultTableModel();
-					String[] identificadores = {"Código", "Nombre", "Apellido", "Especialidad"};
+					String[] identificadores = {"CÃ³digo", "Nombre", "Apellido", "Especialidad"};
 					modelo.setColumnIdentifiers(identificadores);
 					table.setModel(modelo);
 					scrollPane.setViewportView(table);

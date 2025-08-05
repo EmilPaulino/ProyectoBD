@@ -46,6 +46,7 @@ public class ListadoEnfermedades extends JDialog {
 	public ListadoEnfermedades() {
 		setTitle("Listado de enfermedades");
 		setBounds(100, 100, 611, 375);
+		setLocationRelativeTo(null);
 		getContentPane().setLayout(new BorderLayout());
 		contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		getContentPane().add(contentPanel, BorderLayout.CENTER);
@@ -64,7 +65,7 @@ public class ListadoEnfermedades extends JDialog {
 						@Override
 						public void mouseClicked(MouseEvent e) {
 							index = table.getSelectedRow();
-							if(index>=0) {
+							if(index>=0 && ClinicaMedica.getLoginUsuario().getIdRol() == 1) {
 								btnModificar.setEnabled(true);
 								String codigo = table.getValueAt(index,0).toString();
 								selected = ClinicaMedica.getInstance().buscarEnfermedadByCodigo(codigo);

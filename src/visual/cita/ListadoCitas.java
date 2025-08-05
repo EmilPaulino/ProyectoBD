@@ -50,6 +50,7 @@ public class ListadoCitas extends JDialog {
 	public ListadoCitas() {
 		setTitle("Listado de citas");
 		setBounds(100, 100, 619, 398);
+		setLocationRelativeTo(null);
 		getContentPane().setLayout(new BorderLayout());
 		contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		getContentPane().add(contentPanel, BorderLayout.CENTER);

@@ -62,6 +62,7 @@ public class Vacunar extends JDialog {
 	public Vacunar() {
 		setTitle("Vacunar");
 		setBounds(100, 100, 525, 353);
+		setLocationRelativeTo(null);
 		getContentPane().setLayout(new BorderLayout());
 		contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		getContentPane().add(contentPanel, BorderLayout.CENTER);

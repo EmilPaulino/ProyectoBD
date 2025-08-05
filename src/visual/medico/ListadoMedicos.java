@@ -47,6 +47,7 @@ public class ListadoMedicos extends JDialog {
 	public ListadoMedicos() {
 		setTitle("Listado de m\u00E9dicos");
 		setBounds(100, 100, 613, 372);
+		setLocationRelativeTo(null);
 		getContentPane().setLayout(new BorderLayout());
 		contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		getContentPane().add(contentPanel, BorderLayout.CENTER);

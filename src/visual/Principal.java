@@ -66,6 +66,8 @@ public class Principal extends JFrame {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		dim = getToolkit().getScreenSize();
 		setBounds(100, 100, 450, 300);
+		setLocationRelativeTo(null);
+
 		
 		JMenuBar menuBar = new JMenuBar();
 		setJMenuBar(menuBar);
@@ -97,9 +99,6 @@ public class Principal extends JFrame {
 		});
 		mnNewMenu.add(mntmNewMenuItem_1);
 		
-		if(ClinicaMedica.getLoginUsuario().getIdRol() == 1 ) {
-			mntmNewMenuItem_1.setEnabled(false);
-		}
 
 		JMenu mnNewMenu_1 = new JMenu("M\u00E9dicos");
 		menuBar.add(mnNewMenu_1);
@@ -216,6 +215,9 @@ public class Principal extends JFrame {
 			}
 		});
 		mnNewMenu_4.add(mntmNewMenuItem_8);
+		if(ClinicaMedica.getLoginUsuario().getIdRol() == 1) {
+			mntmNewMenuItem_8.setEnabled(false);
+		}
 		
 		JMenu mnNewMenu_5 = new JMenu("Vacunas");
 		menuBar.add(mnNewMenu_5);

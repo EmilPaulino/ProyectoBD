@@ -55,6 +55,7 @@ public class DetalleMedico extends JDialog {
 		setTitle("Detalle Medico");
 		selected = aux;
 		setBounds(100, 100, 568, 300);
+		setLocationRelativeTo(null);
 		getContentPane().setLayout(new BorderLayout());
 		contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		getContentPane().add(contentPanel, BorderLayout.CENTER);

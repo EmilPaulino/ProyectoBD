@@ -49,6 +49,7 @@ public class SeleccionarPaciente extends JDialog {
 	public SeleccionarPaciente() {
 		setTitle("Seleccionar paciente");
 		setBounds(100, 100, 593, 386);
+		setLocationRelativeTo(null);
 		getContentPane().setLayout(new BorderLayout());
 		contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		getContentPane().add(contentPanel, BorderLayout.CENTER);
