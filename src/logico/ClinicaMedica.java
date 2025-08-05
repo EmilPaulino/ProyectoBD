@@ -1188,19 +1188,7 @@ public class ClinicaMedica implements Serializable {
 	    return cita;
 	}
 
-	public int buscarCitaByIdGetIndex(String idCita) {
-		int index = -1;
-		boolean encontrado = false;
-		int i = 0;
-		while (!encontrado && i < lasCitas.size()) {
-			if (lasCitas.get(i).getIdCita().equalsIgnoreCase(idCita)) {
-				index = i; 
-				encontrado = true; 
-			}
-			i++;
-		}
-		return index; 
-	}
+
 
 	public void eliminarCita(Cita cita) {
 	    Connection con = null;
@@ -1258,18 +1246,6 @@ public class ClinicaMedica implements Serializable {
 	            ex.printStackTrace();
 	        }
 	    }
-	}
-
-	public boolean existeCita(Date fecha, Date hora, Medico medico) {
-		boolean existe = false;
-		int i = 0;
-		while(!existe && i<lasCitas.size()) {
-			if(lasCitas.get(i).getFecha().equals(fecha) && lasCitas.get(i).getHora().equals(hora) && lasCitas.get(i).getMedico().equals(medico)) {
-				existe = true;
-			}
-			i++;
-		}
-		return existe;
 	}
 
 	public Vacuna buscarVacunaByCodigo(String codigo) {
@@ -1618,19 +1594,6 @@ public class ClinicaMedica implements Serializable {
 
 	}
 
-	private int buscarUsuarioByID(String codigo) {
-		int usuario = -1;
-		boolean encontrado = false;
-		int i = 0;
-		while(!encontrado && i < losUsuarios.size()) {
-			if(losUsuarios.get(i).getCodigo().equals(codigo)) {
-				usuario = i;
-				encontrado = true;
-			}
-			i++;
-		}
-		return usuario;
-	}
 
 
 	public Usuario buscarUsuarioByCodigo(String codigo) {
